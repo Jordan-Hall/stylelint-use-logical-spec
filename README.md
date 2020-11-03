@@ -1,4 +1,4 @@
-# Property Use Logical[stylelint]
+# Property Use Logical [stylelint]
 
 [![NPM Version][npm-img]][npm-url]
 
