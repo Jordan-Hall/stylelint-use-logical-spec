@@ -207,6 +207,9 @@ Assuming _left to right_ directionality:
 | `padding-left`    | `padding-inline-start` |
 
 
+## Special thanks
+Code based off https://github.com/csstools/stylelint-use-logical
+
 
 [npm-img]: https://img.shields.io/npm/v/stylelint-use-logical-spec.svg
 [npm-url]: https://www.npmjs.com/package/stylelint-use-logical-spec
