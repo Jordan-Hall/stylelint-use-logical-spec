@@ -1,8 +1,6 @@
-# Property Use Logical [<img src="https://jonathantneal.github.io/stylelint-logo.svg" alt="stylelint" width="90" height="90" align="right">][stylelint]
+# Property Use Logical[stylelint]
 
 [![NPM Version][npm-img]][npm-url]
-[![Build Status][cli-img]][cli-url]
-[![Support Chat][git-img]][git-url]
 
 [Property Use Logical] is a [stylelint] rule to enforce the usage of
 [Logical Properties and Values] in CSS.
@@ -74,7 +72,7 @@ blockquote {
 Add [stylelint] and [Property Use Logical] to your project.
 
 ```bash
-npm install stylelint stylelint-use-logical --save-dev
+npm install stylelint stylelint-use-logical-spec --save-dev
 ```
 
 Add [Property Use Logical] to your [stylelint configuration].
@@ -82,7 +80,7 @@ Add [Property Use Logical] to your [stylelint configuration].
 ```js
 {
   "plugins": [
-    "stylelint-use-logical"
+    "stylelint-use-logical-spec"
   ],
   "rules": {
     "liberty/use-logical-spec": ("always" || true) || ("ignore" || false || null)
@@ -208,14 +206,12 @@ Assuming _left to right_ directionality:
 | `padding-bottom`  | `padding-block-end`    |
 | `padding-left`    | `padding-inline-start` |
 
-[cli-img]: https://img.shields.io/travis/csstools/stylelint-use-logical.svg
-[cli-url]: https://travis-ci.org/csstools/stylelint-use-logical
-[git-img]: https://img.shields.io/badge/support-chat-blue.svg
-[git-url]: https://gitter.im/stylelint/stylelint
-[npm-img]: https://img.shields.io/npm/v/stylelint-use-logical.svg
-[npm-url]: https://www.npmjs.com/package/stylelint-use-logical
+
+
+[npm-img]: https://img.shields.io/npm/v/stylelint-use-logical-spec.svg
+[npm-url]: https://www.npmjs.com/package/stylelint-use-logical-spec
 
 [Logical Properties and Values]: https://www.w3.org/TR/css-logical-1/
 [stylelint]: https://github.com/stylelint/stylelint
 [stylelint configuration]: https://github.com/stylelint/stylelint/blob/master/docs/user-guide/configuration.md#readme
-[Property Use Logical]: https://github.com/csstools/stylelint-use-logical
+[Property Use Logical]: https://github.com/Jordan-Hall/stylelint-use-logical-spec
