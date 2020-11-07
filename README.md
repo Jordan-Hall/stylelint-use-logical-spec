@@ -185,12 +185,16 @@ properties and values should be reported or autofixed.
 
 Assuming _left to right_ directionality:
 
+# Positioning
+
 | Physical Property | Logical Property       |
 | ----------------- | ---------------------- |
 | `top`             | `inset-block-start`    |
 | `right`           | `inset-inline-end`     |
 | `bottom`          | `inset-block-end`      |
 | `left`            | `inset-inline-start`   |
+
+### margin
 
 | Physical Property | Logical Property       |
 | ----------------- | ---------------------- |
@@ -199,6 +203,8 @@ Assuming _left to right_ directionality:
 | `margin-bottom`   | `margin-block-end`     |
 | `margin-left`     | `margin-inline-start`  |
 
+### Padding
+
 | Physical Property | Logical Property       |
 | ----------------- | ---------------------- |
 | `padding-top`     | `padding-block-start`  |
@@ -206,6 +212,37 @@ Assuming _left to right_ directionality:
 | `padding-bottom`  | `padding-block-end`    |
 | `padding-left`    | `padding-inline-start` |
 
+
+### Border
+
+| Physical Property            | Logical Property            |
+| ---------------------------- | --------------------------- |
+| `border-top`                 | `border-block-start`        |
+| `border-top-color`           | `border-block-start-color`  |
+| `border-top-style`           | `border-block-start-style`  |
+| `border-top-width`           | `border-block-start-width`  |
+| `border-bottom`              | `border-block-end`          |
+| `border-bottom-color`        | `border-block-end-color`    |
+| `border-bottom-style`        | `border-block-end-style`    |
+| `border-bottom-width`        | `border-block-end-width`    |
+| `border-left`                | `border-inline-start`       |
+| `border-left-color`          | `border-inline-start-color` |
+| `border-left-style`          | `border-inline-start-style` |
+| `border-left-width`          | `border-inline-start-width` |
+| `border-right`               | `border-inline-end`         |
+| `border-right-color`         | `border-inline-end-color`   |
+| `border-right-style`         | `border-inline-end-style`   |
+| `border-right-width`         | `border-inline-end-width`   |
+| `border-top-left-radius`     | `border-start-start-radius` |
+| `border-bottom-left-radius`  | `border-start-end-radius`   |
+| `border-top-right-radius`    | `border-end-start-radius`   |
+| `border-bottom-right-radius` | `border-end-end-radius`     |
+
+
+border-start-start-radius	border-top-left-radius
+border-start-end-radius	border-bottom-left-radius
+border-end-start-radius	border-top-right-radius
+border-end-end-radius	border-bottom-right-radius
 
 ## Special thanks
 Codebase off https://github.com/csstools/stylelint-use-logical
