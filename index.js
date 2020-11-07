@@ -1,5 +1,5 @@
 import stylelint from 'stylelint';
-import { physicalProp, physical2Prop, physical4Prop, physicalValue } from './lib/maps';
+import { physicalProp, physical2Prop, physical4Prop, physicalValue, migrationNoneSpec } from './lib/maps';
 import { validateRuleWithProps } from './lib/validate';
 import ruleName from './lib/rule-name';
 import messages from './lib/messages';
@@ -29,6 +29,13 @@ export default stylelint.createPlugin(ruleName, (method, opts, context) => {
 			ruleName
 		});
 
+		const reportUnsupportedProp = (decl, logicalProperty) => stylelint.utils.report({
+			message: messages.unsupportedProp(decl.prop, logicalProperty),
+			node: decl,
+			result,
+			ruleName
+		});
+
 		const reportUnexpectedValue = (node, value) => stylelint.utils.report({
 			message: messages.unexpectedValue(node.prop, node.value, value),
 			node,
@@ -38,6 +45,34 @@ export default stylelint.createPlugin(ruleName, (method, opts, context) => {
 
 		if (isMethodValid && isMethodAlways(method)) {
 			walk(root, node => {
+
+				// MIGRATION from out of date props https://github.com/csstools/stylelint-use-logical/issues/1
+
+				migrationNoneSpec.forEach(([prop, props]) => {
+					validateRuleWithProps(node, prop, (outDateDecl) => {
+						console.warn(`Property ${prop[0]} is not part of Logical standards.`);
+						if (isAutofix) {
+							console.warn(`Migrating ${prop[0]} to Logical standards.`);
+							const value = outDateDecl.value;
+							outDateDecl.cloneBefore({
+								prop:	props[0],
+								value
+							});
+							outDateDecl.cloneAfter({
+								prop: props[1],
+								value
+							});
+							outDateDecl.remove();
+						} else if (!isDeclReported(outDateDecl)) {
+							reportUnsupportedProp(outDateDecl, props);
+							reportedDecls.set(outDateDecl);
+						}
+					})
+				})
+
+
+
+
 				// validate or autofix 4 physical properties as logical shorthands
 				physical4Prop.forEach(([props, prop]) => {
 					validateRuleWithProps(node, props, (blockStartDecl, blockStartIndex, inlineStartDecl, inlineStartIndex, blockEndDecl, blockEndIndex, inlineEndDecl, inlineEndIndex) => { // eslint-disable-line

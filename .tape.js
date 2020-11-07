@@ -1,5 +1,20 @@
 module.exports = {
 	'liberty/use-logical-spec': [
+		{
+			source: 'body { margin-start: 0; }',
+			expect: 'body { margin-block-start: 0; margin-inline-start: 0; }',
+			args: 'always'
+		},
+		{
+			source: 'body { margin-end: 0; }',
+			expect: 'body { margin-block-end: 0; margin-inline-end: 0; }',
+			args: 'always'
+		},
+		{
+			source: 'body { padding-end: 0; }',
+			warnings: 1,
+			args: 'always'
+		},
 	{
 		source: 'body { left: 0 }',
 		args: 'always',
