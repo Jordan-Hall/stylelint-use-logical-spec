@@ -42,64 +42,72 @@ export default stylelint.createPlugin(ruleName, (method, opts, context) => {
 				physical4Prop.forEach(([props, prop]) => {
 					validateRuleWithProps(node, props, (blockStartDecl, blockStartIndex, inlineStartDecl, inlineStartIndex, blockEndDecl, blockEndIndex, inlineEndDecl, inlineEndIndex) => { // eslint-disable-line
 						const firstInlineDecl = blockStartDecl;
+						if (
+							!isDeclAnException(blockStartDecl, propExceptions) &&
+							!isDeclAnException(inlineStartDecl, propExceptions) &&
+							!isDeclAnException(blockEndDecl, propExceptions) &&
+							!isDeclAnException(inlineEndDecl, propExceptions)
+						) {
+							if (isAutofix) {
+								const values = [blockStartDecl.value, inlineStartDecl.value, blockEndDecl.value, inlineEndDecl.value];
 
-						if (isAutofix) {
-							const values = [blockStartDecl.value, inlineStartDecl.value, blockEndDecl.value, inlineEndDecl.value];
-
-							if (values[1] === values[3]) {
-								values.pop();
-
-								if (values[2] === values[1]) {
+								if (values[1] === values[3]) {
 									values.pop();
 
-									if (values[1] === values[0]) {
+									if (values[2] === values[1]) {
 										values.pop();
+
+										if (values[1] === values[0]) {
+											values.pop();
+										}
 									}
 								}
+
+								firstInlineDecl.cloneBefore({
+									prop,
+									value: values.length <= 2 ? values.join(' ') : `logical ${values.join(' ')}`
+								});
+
+								blockStartDecl.remove();
+								inlineStartDecl.remove();
+								blockEndDecl.remove();
+								inlineEndDecl.remove();
+							} else if (!isDeclReported(blockStartDecl) && !isDeclReported(inlineStartDecl) && !isDeclReported(blockEndDecl) && !isDeclReported(inlineEndDecl)) {
+								reportUnexpectedProperty(firstInlineDecl, prop);
+
+								reportedDecls.set(blockStartDecl);
+								reportedDecls.set(inlineStartDecl);
+								reportedDecls.set(blockEndDecl);
+								reportedDecls.set(inlineEndDecl);
 							}
-
-							firstInlineDecl.cloneBefore({
-								prop,
-								value: values.length <= 2 ? values.join(' ') : `logical ${values.join(' ')}`
-							});
-
-							blockStartDecl.remove();
-							inlineStartDecl.remove();
-							blockEndDecl.remove();
-							inlineEndDecl.remove();
-						} else if (!isDeclReported(blockStartDecl) && !isDeclReported(inlineStartDecl) && !isDeclReported(blockEndDecl) && !isDeclReported(inlineEndDecl)) {
-							reportUnexpectedProperty(firstInlineDecl, prop);
-
-							reportedDecls.set(blockStartDecl);
-							reportedDecls.set(inlineStartDecl);
-							reportedDecls.set(blockEndDecl);
-							reportedDecls.set(inlineEndDecl);
 						}
 					});
 				});
 
 				// validate or autofix 2 physical properties as logical shorthands
 				physical2Prop().forEach(([props, prop]) => {
-					validateRuleWithProps(node, props, (blockStartDecl, blockStartIndex, inlineStartDecl, inlineStartIndex) => { // eslint-disable-line
-						const firstInlineDecl = blockStartIndex < inlineStartIndex
-							? blockStartDecl
-						: inlineStartDecl;
+					validateRuleWithProps(node, props, (startDecl, startIndex, endDecl, endStartIndex) => { // eslint-disable-line
+						const firstInlineDecl = startIndex < endStartIndex
+							? startDecl
+							: endDecl;
 
-						if (isAutofix) {
-							firstInlineDecl.cloneBefore({
-								prop,
-								value: blockStartDecl.value === inlineStartDecl.value
-									? blockStartDecl.value
-								: [blockStartDecl.value, inlineStartDecl.value].join(' ')
-							});
+						if (!isDeclAnException(startDecl, propExceptions) && !isDeclAnException(endDecl, propExceptions)) {
+							if (isAutofix) {
+								firstInlineDecl.cloneBefore({
+									prop,
+									value: startDecl.value === endDecl.value
+										? startDecl.value
+										: [startDecl.value, endDecl.value].join(' ')
+								});
 
-							blockStartDecl.remove();
-							inlineStartDecl.remove();
-						} else if (!isDeclReported(blockStartDecl) && !isDeclReported(inlineStartDecl)) {
-							reportUnexpectedProperty(firstInlineDecl, prop);
+								startDecl.remove();
+								endDecl.remove();
+							} else if (!isDeclReported(startDecl) && !isDeclReported(endDecl)) {
+								reportUnexpectedProperty(firstInlineDecl, prop);
 
-							reportedDecls.set(blockStartDecl);
-							reportedDecls.set(inlineStartDecl);
+								reportedDecls.set(startDecl);
+								reportedDecls.set(endDecl);
+							}
 						}
 					});
 				});
