@@ -20,13 +20,13 @@ scope and avoid unrelated commits.
 1. To begin; [fork this project], clone your fork, and add our upstream.
    ```bash
    # Clone your fork of the repo into the current directory
-   git clone git@github.com:YOUR_USER/stylelint-use-logical.git
+   git clone git@github.com:YOUR_USER/stylelint-use-logical-spec.git
 
    # Navigate to the newly cloned directory
-   cd stylelint-use-logical
+   cd stylelint-use-logical-spec
 
    # Assign the original repo to a remote called "upstream"
-   git remote add upstream git@github.com:csstools/stylelint-use-logical.git
+   git remote add upstream git@github.com:csstools/stylelint-use-logical-spec.git
 
    # Install the tools necessary for testing
    npm install

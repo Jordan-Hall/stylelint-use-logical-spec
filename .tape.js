@@ -1,5 +1,21 @@
 module.exports = {
-	'liberty/use-logical-spec': [{
+	'liberty/use-logical-spec': [
+		{
+			source: 'body { margin-start: 0; }',
+			expect: 'body { margin-block-start: 0; margin-inline-start: 0; }',
+			args: 'always'
+		},
+		{
+			source: 'body { margin-end: 0; }',
+			expect: 'body { margin-block-end: 0; margin-inline-end: 0; }',
+			args: 'always'
+		},
+		{
+			source: 'body { padding-end: 0; }',
+			warnings: 1,
+			args: 'always'
+		},
+	{
 		source: 'body { left: 0 }',
 		args: 'always',
 		warnings: 1,
@@ -165,6 +181,12 @@ module.exports = {
 			source: 'body { border-bottom-right-radius: 0; }',
 			expect: 'body { border-end-end-radius: 0; }',
 			args: 'always'
+		},
+		{
+			source: 'body { margin-top: 0.5rem; margin-bottom: 0.5rem; }',
+			expect: 'body { margin-top: 0.5rem; margin-bottom: 0.5rem; }',
+			args: ['always', { except: ["margin-top", "margin-bottom"] }],
+			warnings: 0
 		}
 	]
 };
