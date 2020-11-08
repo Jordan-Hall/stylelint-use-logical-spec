@@ -1,5 +1,18 @@
 # Changes to Property Use Logical
 
+### 3.1.0 (November 3rd, 2020)
+- Added: migration from version 2.0.0  to 3.1.0 removing none compliant code outlined in version 2.1.0
+- Added: Documentation for `border` support
+- Updated: peer-dependency of styleline to `13.7.2`
+- Fixed: repaired `Except` issues reported on original codebase - https://github.com/csstools/stylelint-use-logical/issues/3
+
+### 3.0.* (November 3rd, 2020)
+- Updated: Support for `border` logical values
+
+
+### 2.1.0 (November 3rd, 2020)
+- removed none compliant properties `inset-start`, `inset-end` `margin-start` `margin-end` `padding-start` `padding-end` (*Breaking changes*)
+
 ### 2.0.0 (May 12, 2018)
 
 - Updated: peer `stylelint` to 10.0.1 (major)
