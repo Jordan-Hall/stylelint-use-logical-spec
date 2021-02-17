@@ -187,6 +187,30 @@ module.exports = {
 			expect: 'body { margin-top: 0.5rem; margin-bottom: 0.5rem; }',
 			args: ['always', { except: ["margin-top", "margin-bottom"] }],
 			warnings: 0
+		}, {
+			source: 'body { height: 250rem; }',
+			expect: 'body { block-size: 250rem; }',
+			args: 'always'
+		}, {
+			source: 'body { min-height: 250rem; }',
+			expect: 'body { min-block-size: 250rem; }',
+			args: 'always'
+		}, {
+			source: 'body { max-height: 250rem; }',
+			expect: 'body { max-block-size: 250rem; }',
+			args: 'always'
+		}, {
+			source: 'body { width: 250rem; }',
+			expect: 'body { inline-size: 250rem; }',
+			args: 'always'
+		}, {
+			source: 'body { min-width: 250rem; }',
+			expect: 'body { min-inline-size: 250rem; }',
+			args: 'always'
+		}, {
+			source: 'body { max-width: 250rem; }',
+			expect: 'body { max-inline-size: 250rem; }',
+			args: 'always'
 		}
 	]
 };

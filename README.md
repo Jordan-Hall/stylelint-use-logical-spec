@@ -212,6 +212,16 @@ Assuming _left to right_ directionality:
 | `padding-bottom`  | `padding-block-end`    |
 | `padding-left`    | `padding-inline-start` |
 
+### Logical Height and Logical Width
+
+| Physical Property | Logical Property       |
+| ----------------- | ---------------------- |
+| `height`          | `block-size`           |
+| `min-height`      | `min-block-size`       |
+| `max-height`      | `max-block-size`       |
+| `width`           | `inline-size`          |
+| `min-width`       | `min-inline-size`      |
+| `max-width`       | `max-inline-size`      |
 
 ### Border
 
