@@ -1,5 +1,10 @@
 # Changes to Property Use Logical
 
+## 3.2.2 (July 26th, 2021)
+
+- Update package-lock dependencies
+- fix git workflow
+
 ## 3.2.1 (July 26th, 2021)
 
 - Update stylelint peer dependency to use current version or late
