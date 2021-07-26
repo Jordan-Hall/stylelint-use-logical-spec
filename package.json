@@ -38,7 +38,7 @@
     "stylelint-tape": "^2.0.0"
   },
   "peerDependencies": {
-    "stylelint": "^13.7.2"
+    "stylelint": ">=13"
   },
   "eslintConfig": {
     "extends": "dev",
