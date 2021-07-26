@@ -1,5 +1,9 @@
 # Changes to Property Use Logical
 
+## 3.2.1 (July 26th, 2021)
+
+- Update stylelint peer dependency to use current version or late
+
 ## 3.2.0 (February 16th, 2021)
 
 - Added: support for `Logical height`
