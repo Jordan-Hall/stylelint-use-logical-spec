@@ -3,7 +3,10 @@
   "version": "3.2.1",
   "description": "Enforce usage of logical properties and values in CSS",
   "license": "CC0-1.0",
-  "repository": "Jordan-Hall/stylelint-use-logical-spec",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Jordan-Hall/stylelint-use-logical-spec"
+  },
   "homepage": "https://github.com/Jordan-Hall/stylelint-use-logical-spec#readme",
   "bugs": "https://github.com/Jordan-Hall/stylelint-use-logical-spec/issues",
   "main": "index.cjs.js",
