@@ -89,7 +89,7 @@ export default stylelint.createPlugin(ruleName, (method, opts, context) => {
 								if (values[1] === values[3]) {
 									values.pop();
 
-									if (values[2] === values[1]) {
+									if (values[2] === values[0]) {
 										values.pop();
 
 										if (values[1] === values[0]) {
