@@ -1,5 +1,5 @@
 import stylelint from 'stylelint';
-import { physicalProp, physical2Prop, physical4Prop, physicalValue, migrationNoneSpec } from './lib/maps';
+import { physicalProp, physical2Prop, physicalShorthandProp, physical4Prop, physicalValue, migrationNoneSpec } from './lib/maps';
 import { validateRuleWithProps } from './lib/validate';
 import ruleName from './lib/rule-name';
 import messages from './lib/messages';
@@ -107,6 +107,37 @@ export default stylelint.createPlugin(ruleName, (method, opts, context) => {
 					});
 				});
 
+
+				// validate or autofix shorthand properties that are not supported
+				physicalShorthandProp.forEach((prop) => {
+					validateRuleWithProps(node, [prop], physicalDecl => { // eslint-disable-line
+						let inputValues = physicalDecl.value.trim().split(' ');
+						if (
+							!isDeclAnException(physicalDecl, propExceptions) &&
+							inputValues.length !== 1
+						) {
+
+							if (isAutofix) {
+								let outputValues = convertShorthandValues(inputValues, dir);
+
+								['block', 'inline'].forEach(type => {
+									physicalDecl.cloneBefore({
+										prop: prop + "-" + type,
+										value: outputValues[type]
+									});
+								})
+
+								physicalDecl.remove();
+
+							} else if (!isDeclReported(physicalDecl)) {
+								reportUnexpectedProperty(physicalDecl, `${prop}-block and ${prop}-inline`);
+
+								reportedDecls.set(physicalDecl);
+							}
+						}
+					});
+				});
+
 				// validate or autofix 2 physical properties as logical shorthands
 				physical2Prop().forEach(([props, prop]) => {
 					validateRuleWithProps(node, props, (startDecl, startIndex, endDecl, endStartIndex) => { // eslint-disable-line
@@ -196,3 +227,34 @@ const shorthandValueShorten = values => {
 	return values;
 };
 
+const convertShorthandValues = (input, dir) => {
+	let block, inline;
+	if (input.length === 1) {
+		block = input[0];
+		inline = input[0];
+	}
+	if (input.length === 2) {
+		block = input[0];
+		inline = input[1];
+	}
+	if (input.length === 3) {
+		block = input[0] + ' ' + input[2];
+		inline = input[1];
+	}
+	if (input.length === 4) {
+		block = input[0] + ' ' + input[2];
+		inline = dir === 'ltr' ? input[3] + ' ' + input[1] : input[1] + ' ' + input[3];
+	}
+	return {
+		block: optimizeCssValues(block),
+		inline: optimizeCssValues(inline)
+	};
+};
+
+const optimizeCssValues = (value) => {
+	let values = value.split(' ');
+	if (values.length === 2 && values[0] === values[1]) {
+		return value[0];
+	}
+	return value;
+}
