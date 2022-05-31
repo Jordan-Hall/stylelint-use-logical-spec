@@ -139,7 +139,7 @@ export default stylelint.createPlugin(ruleName, (method, opts, context) => {
 				});
 
 				// validate or autofix 2 physical properties as logical shorthands
-				physical2Prop().forEach(([props, prop]) => {
+				physical2Prop(dir).forEach(([props, prop]) => {
 					validateRuleWithProps(node, props, (startDecl, startIndex, endDecl, endStartIndex) => { // eslint-disable-line
 						const firstInlineDecl = startIndex < endStartIndex
 							? startDecl
