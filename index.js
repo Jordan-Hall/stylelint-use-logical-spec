@@ -1,5 +1,5 @@
 import stylelint from 'stylelint';
-import { physicalProp, physical2Prop, physical4Prop, physicalValue, migrationNoneSpec } from './lib/maps';
+import { physicalProp, physical2Prop, physicalShorthandProp, physical4Prop, physicalValue, migrationNoneSpec } from './lib/maps';
 import { validateRuleWithProps } from './lib/validate';
 import ruleName from './lib/rule-name';
 import messages from './lib/messages';
@@ -71,36 +71,24 @@ export default stylelint.createPlugin(ruleName, (method, opts, context) => {
 				})
 
 
-
-
+				/* logical shorthands do not work yet in browsers */
+				/* but we can still use shorthand if all values are the same */
 				// validate or autofix 4 physical properties as logical shorthands
 				physical4Prop.forEach(([props, prop]) => {
 					validateRuleWithProps(node, props, (blockStartDecl, blockStartIndex, inlineStartDecl, inlineStartIndex, blockEndDecl, blockEndIndex, inlineEndDecl, inlineEndIndex) => { // eslint-disable-line
 						const firstInlineDecl = blockStartDecl;
+						const values = shorthandValueShorten([blockStartDecl.value, inlineStartDecl.value, blockEndDecl.value, inlineEndDecl.value]);
 						if (
 							!isDeclAnException(blockStartDecl, propExceptions) &&
 							!isDeclAnException(inlineStartDecl, propExceptions) &&
 							!isDeclAnException(blockEndDecl, propExceptions) &&
-							!isDeclAnException(inlineEndDecl, propExceptions)
+							!isDeclAnException(inlineEndDecl, propExceptions) &&
+							values.length === 1 // only report issues if there is 1 value after shortening
 						) {
 							if (isAutofix) {
-								const values = [blockStartDecl.value, inlineStartDecl.value, blockEndDecl.value, inlineEndDecl.value];
-
-								if (values[1] === values[3]) {
-									values.pop();
-
-									if (values[2] === values[1]) {
-										values.pop();
-
-										if (values[1] === values[0]) {
-											values.pop();
-										}
-									}
-								}
-
 								firstInlineDecl.cloneBefore({
 									prop,
-									value: values.length <= 2 ? values.join(' ') : `logical ${values.join(' ')}`
+									value: values.join(' ')
 								});
 
 								blockStartDecl.remove();
@@ -119,8 +107,39 @@ export default stylelint.createPlugin(ruleName, (method, opts, context) => {
 					});
 				});
 
+
+				// validate or autofix shorthand properties that are not supported
+				physicalShorthandProp.forEach((prop) => {
+					validateRuleWithProps(node, [prop], physicalDecl => { // eslint-disable-line
+						let inputValues = physicalDecl.value.trim().split(' ');
+						if (
+							!isDeclAnException(physicalDecl, propExceptions) &&
+							inputValues.length !== 1
+						) {
+
+							if (isAutofix) {
+								let outputValues = convertShorthandValues(inputValues, dir);
+
+								['block', 'inline'].forEach(type => {
+									physicalDecl.cloneBefore({
+										prop: prop + "-" + type,
+										value: outputValues[type]
+									});
+								})
+
+								physicalDecl.remove();
+
+							} else if (!isDeclReported(physicalDecl)) {
+								reportUnexpectedProperty(physicalDecl, `${prop}-block and ${prop}-inline`);
+
+								reportedDecls.set(physicalDecl);
+							}
+						}
+					});
+				});
+
 				// validate or autofix 2 physical properties as logical shorthands
-				physical2Prop().forEach(([props, prop]) => {
+				physical2Prop(dir).forEach(([props, prop]) => {
 					validateRuleWithProps(node, props, (startDecl, startIndex, endDecl, endStartIndex) => { // eslint-disable-line
 						const firstInlineDecl = startIndex < endStartIndex
 							? startDecl
@@ -195,3 +214,47 @@ const isDeclAnException = (decl, propExceptions) => propExceptions.some(match =>
 	? match.test(decl.prop)
 : String(match || '').toLowerCase() === String(decl.prop || '').toLowerCase());
 const isDeclReported = decl => reportedDecls.has(decl);
+
+const shorthandValueShorten = values => {
+	const map = [[1, 0], [0, 2], [1, 3]];
+	for (let x = values.length - 2; x >= 0; x--)
+	{
+		if (values[map[x][0]] !== values[map[x][1]]) {
+			break;
+		}
+		values.pop();
+	}
+	return values;
+};
+
+const convertShorthandValues = (input, dir) => {
+	let block, inline;
+	if (input.length === 1) {
+		block = input[0];
+		inline = input[0];
+	}
+	if (input.length === 2) {
+		block = input[0];
+		inline = input[1];
+	}
+	if (input.length === 3) {
+		block = input[0] + ' ' + input[2];
+		inline = input[1];
+	}
+	if (input.length === 4) {
+		block = input[0] + ' ' + input[2];
+		inline = dir === 'ltr' ? input[3] + ' ' + input[1] : input[1] + ' ' + input[3];
+	}
+	return {
+		block: optimizeCssValues(block),
+		inline: optimizeCssValues(inline)
+	};
+};
+
+const optimizeCssValues = (value) => {
+	let values = value.split(' ');
+	if (values.length === 2 && values[0] === values[1]) {
+		return value[0];
+	}
+	return value;
+}
