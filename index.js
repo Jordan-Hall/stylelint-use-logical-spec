@@ -71,36 +71,24 @@ export default stylelint.createPlugin(ruleName, (method, opts, context) => {
 				})
 
 
-
-
+				/* logical shorthands do not work yet in browsers */
+				/* but we can still use shorthand if all values are the same */
 				// validate or autofix 4 physical properties as logical shorthands
 				physical4Prop.forEach(([props, prop]) => {
 					validateRuleWithProps(node, props, (blockStartDecl, blockStartIndex, inlineStartDecl, inlineStartIndex, blockEndDecl, blockEndIndex, inlineEndDecl, inlineEndIndex) => { // eslint-disable-line
 						const firstInlineDecl = blockStartDecl;
+						const values = shorthandValueShorten([blockStartDecl.value, inlineStartDecl.value, blockEndDecl.value, inlineEndDecl.value]);
 						if (
 							!isDeclAnException(blockStartDecl, propExceptions) &&
 							!isDeclAnException(inlineStartDecl, propExceptions) &&
 							!isDeclAnException(blockEndDecl, propExceptions) &&
-							!isDeclAnException(inlineEndDecl, propExceptions)
+							!isDeclAnException(inlineEndDecl, propExceptions) &&
+							values.length === 1 // only report issues if there is 1 value after shortening
 						) {
 							if (isAutofix) {
-								const values = [blockStartDecl.value, inlineStartDecl.value, blockEndDecl.value, inlineEndDecl.value];
-
-								if (values[1] === values[3]) {
-									values.pop();
-
-									if (values[2] === values[1]) {
-										values.pop();
-
-										if (values[1] === values[0]) {
-											values.pop();
-										}
-									}
-								}
-
 								firstInlineDecl.cloneBefore({
 									prop,
-									value: values.length <= 2 ? values.join(' ') : `logical ${values.join(' ')}`
+									value: values.join(' ')
 								});
 
 								blockStartDecl.remove();
@@ -195,3 +183,16 @@ const isDeclAnException = (decl, propExceptions) => propExceptions.some(match =>
 	? match.test(decl.prop)
 : String(match || '').toLowerCase() === String(decl.prop || '').toLowerCase());
 const isDeclReported = decl => reportedDecls.has(decl);
+
+const shorthandValueShorten = values => {
+	const map = [[1, 0], [0, 2], [1, 3]];
+	for (let x = values.length - 2; x >= 0; x--)
+	{
+		if (values[map[x][0]] !== values[map[x][1]]) {
+			break;
+		}
+		values.pop();
+	}
+	return values;
+};
+
