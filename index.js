@@ -1,5 +1,5 @@
 import stylelint from 'stylelint';
-import { physicalProp, physical2Prop, physical4Prop, physicalValue, migrationNoneSpec } from './lib/maps';
+import { physicalProp, physical2Prop, physical4Prop, physicalValue, migrationNoneSpec, propsThatContainPropsInValue } from './lib/maps';
 import { validateRuleWithProps } from './lib/validate';
 import ruleName from './lib/rule-name';
 import messages from './lib/messages';
@@ -180,6 +180,36 @@ export default stylelint.createPlugin(ruleName, (method, opts, context) => {
 						}
 					}
 				});
+
+				// validate or autofix physical values containing properties as logical
+				if (isNodeMatchingDecl(node, propsThatContainPropsInValue)) {
+					const originalValue = node.value.toLowerCase();
+					let value = originalValue;
+
+					physicalProp(dir).forEach(([props, prop]) => {
+						if (!isDeclAnException(node, propExceptions)) {
+
+							props.forEach(searchProp => {
+								if (!isValueAnException(searchProp, propExceptions)) {
+									let regex = new RegExp("(?<!-)" + searchProp + "(?!-)", "g");
+									if (regex.test(value)) {
+										value = value.replace(regex, prop);
+									}
+								}
+							})
+						}
+					});
+
+					if (value !== originalValue) {
+						if (isAutofix) {
+							node.value = value;
+						} else {
+							reportUnexpectedValue(node, value);
+
+							reportedDecls.set(node);
+						}
+					}
+				}
 			});
 		}
 	};
@@ -191,7 +221,8 @@ const isMethodIndifferent = method => method === 'ignore' || method === false ||
 const isMethodAlways = method => method === 'always' || method === true;
 const isContextAutofixing = context => Boolean(Object(context).fix);
 const isNodeMatchingDecl = (decl, regexp) => decl.type === 'decl' && regexp.test(decl.prop);
-const isDeclAnException = (decl, propExceptions) => propExceptions.some(match => match instanceof RegExp
-	? match.test(decl.prop)
-: String(match || '').toLowerCase() === String(decl.prop || '').toLowerCase());
+const isDeclAnException = (decl, propExceptions) => isValueAnException(decl.prop, propExceptions);
+const isValueAnException = (value, propExceptions) => propExceptions.some(match => match instanceof RegExp
+	? match.test(value)
+: String(match || '').toLowerCase() === String(value || '').toLowerCase());
 const isDeclReported = decl => reportedDecls.has(decl);

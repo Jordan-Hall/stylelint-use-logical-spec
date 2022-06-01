@@ -211,6 +211,30 @@ module.exports = {
 			source: 'body { max-width: 250rem; }',
 			expect: 'body { max-inline-size: 250rem; }',
 			args: 'always'
+		}, {
+			source: 'body { transition-property: border-top-color; }',
+			expect: 'body { transition-property: border-block-start-color; }',
+			args: 'always'
+		}, {
+			source: 'body { will-change: padding-left; }',
+			expect: 'body { will-change: padding-inline-start; }',
+			args: 'always'
+		}, {
+			source: 'body { transition: width 1s, top 2s, left 3s; }',
+			expect: 'body { transition: inline-size 1s, inset-block-start 2s, inset-inline-start 3s; }',
+			args: 'always'
+		}, {
+			source: 'body { transition: width 1s, top 2s, left 3s; }',
+			expect: 'body { transition: inline-size 1s, inset-block-start 2s, inset-inline-end 3s; }',
+			args: ['always', { 'direction' : 'rtl' } ]
+		}, {
+			source: 'body { transition: width 1s, top 2s, left 3s; }',
+			expect: 'body { transition: width 1s, inset-block-start 2s, inset-inline-start 3s; }',
+			args: ['always', { 'except' : ['width'] } ]
+		}, {
+			source: 'body { will-change: padding-left; transition: width 1s, top 2s, left 3s; }',
+			warnings: 2,
+			args: 'always'
 		}
 	]
 };
