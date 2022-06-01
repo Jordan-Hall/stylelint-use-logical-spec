@@ -1,5 +1,15 @@
 # Changes to Property Use Logical
 
+## 4.0.0 (May 31st, 2022)
+
+  ### New feature
+  - check shorthand properties and convert them to appropriate logical counterparts #12
+  - Skips over declaration if the shorthand property value is a single value - example `margin: 0;`
+
+  ### Fixes
+  - Fixes bug with 2 prop mapping
+  - Alters 4 prop loop to only consolidate if all values are equal, and will output without the unsupported `logical` keyword
+
 ## 3.2.2 (July 26th, 2021)
 
 - Update package-lock dependencies
