@@ -254,7 +254,7 @@ const convertShorthandValues = (input, dir) => {
 const optimizeCssValues = (value) => {
 	let values = value.split(' ');
 	if (values.length === 2 && values[0] === values[1]) {
-		return value[0];
+		return values[0];
 	}
 	return value;
 }
