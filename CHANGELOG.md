@@ -1,5 +1,21 @@
 # Changes to Property Use Logical
 
+## 4.1.0 (June 3rd, 2022)
+
+#22
+
+The script loops through the maps listing of all properties and will make multiple replacements in a single string such as:
+`transition: max-width 1s, padding-left 2s, margin-top 3s;`
+will recommend (or change to):
+`transition: max-inline-size 1s, padding-inline-start 2s, margin-block-start 3s;` (for 'ltr' anyway)
+
+I could only find 3 properties that would seem to fit this use case:
+- transition
+- transition-property
+- will-change
+
+If there are more, this is easy to update as the regex is stored in the `maps.js` file. By selecting only these nodes, I feel this one should run pretty lean instead of scanning all values for property names.
+
 ## 4.0.0 (May 31st, 2022)
 
   ### New feature
