@@ -91,8 +91,7 @@ module.exports = {
 			args: "always",
 		},
 		{
-			source:
-				"body { margin-top: 10px; margin-right: 10px; margin-bottom: 10px; margin-left: 10px }",
+			source: "body { margin-top: 10px; margin-right: 10px; margin-bottom: 10px; margin-left: 10px }",
 			expect: "body { margin: 10px }",
 			args: "always",
 		},
@@ -142,26 +141,22 @@ module.exports = {
 			args: ["always", { direction: "rtl" }],
 		},
 		{
-			source:
-				"body { margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0 }",
+			source: "body { margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0 }",
 			expect: "body { margin: 0 }",
 			args: "always",
 		},
 		{
-			source:
-				"body { margin-top: 10px; margin-right: 20px; margin-bottom: 10px; margin-left: 20px }",
+			source: "body { margin-top: 10px; margin-right: 20px; margin-bottom: 10px; margin-left: 20px }",
 			expect: "body { margin-block: 10px; margin-inline: 20px }",
 			args: "always",
 		},
 		{
-			source:
-				"body { padding-top: 10px; padding-right: 20px; padding-bottom: 20px; padding-left: 20px }",
+			source: "body { padding-top: 10px; padding-right: 20px; padding-bottom: 20px; padding-left: 20px }",
 			expect: "body { padding-block: 10px 20px; padding-inline: 20px }",
 			args: "always",
 		},
 		{
-			source:
-				"body { padding-top: 10px; padding-right: 20px; padding-bottom: 20px; padding-left: 30px }",
+			source: "body { padding-top: 10px; padding-right: 20px; padding-bottom: 20px; padding-left: 30px }",
 			expect: "body { padding-block: 10px 20px; padding-inline: 30px 20px }",
 			args: "always",
 		},
@@ -344,6 +339,36 @@ module.exports = {
 		{
 			source: "body { max-width: 250rem; }",
 			expect: "body { max-inline-size: 250rem; }",
+			args: "always",
+		},
+		{
+			source: "body { transition-property: border-top-color; }",
+			expect: "body { transition-property: border-block-start-color; }",
+			args: "always",
+		},
+		{
+			source: "body { will-change: padding-left; }",
+			expect: "body { will-change: padding-inline-start; }",
+			args: "always",
+		},
+		{
+			source: "body { transition: width 1s, top 2s, left 3s; }",
+			expect: "body { transition: inline-size 1s, inset-block-start 2s, inset-inline-start 3s; }",
+			args: "always",
+		},
+		{
+			source: "body { transition: width 1s, top 2s, left 3s; }",
+			expect: "body { transition: inline-size 1s, inset-block-start 2s, inset-inline-end 3s; }",
+			args: ["always", { direction: "rtl" }],
+		},
+		{
+			source: "body { transition: width 1s, top 2s, left 3s; }",
+			expect: "body { transition: width 1s, inset-block-start 2s, inset-inline-start 3s; }",
+			args: ["always", { except: ["width"] }],
+		},
+		{
+			source: "body { will-change: padding-left; transition: width 1s, top 2s, left 3s; }",
+			warnings: 2,
 			args: "always",
 		},
 	],
