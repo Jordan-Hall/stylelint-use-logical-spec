@@ -131,6 +131,11 @@ module.exports = {
 			args: "always",
 		},
 		{
+			source: "body { inset: calc(20px * 1) calc(30px * 1) calc(10px * 1); }",
+			expect: "body { inset-block: calc(20px * 1) calc(10px * 1); inset-inline: calc(30px * 1); }",
+			args: "always",
+		},
+		{
 			source: "body { margin: 20px 30px 10px 40px; }",
 			expect: "body { margin-block: 20px 10px; margin-inline: 40px 30px; }",
 			args: "always",

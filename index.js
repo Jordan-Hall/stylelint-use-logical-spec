@@ -1,3 +1,4 @@
+import valueParser from 'postcss-value-parser';
 import stylelint from 'stylelint';
 import { physicalProp, physical2Prop, physicalShorthandProp, physical4Prop, physicalValue, migrationNoneSpec, propsThatContainPropsInValue } from './lib/maps';
 import { validateRuleWithProps } from './lib/validate';
@@ -111,7 +112,7 @@ export default stylelint.createPlugin(ruleName, (method, opts, context) => {
 				// validate or autofix shorthand properties that are not supported
 				physicalShorthandProp.forEach((prop) => {
 					validateRuleWithProps(node, [prop], physicalDecl => { // eslint-disable-line
-						let inputValues = physicalDecl.value.trim().split(' ');
+						let inputValues = valueParser(physicalDecl.value).nodes.filter(value => value.type !== 'space').map(value => valueParser.stringify(value));
 						if (
 							!isDeclAnException(physicalDecl, propExceptions) &&
 							inputValues.length !== 1
