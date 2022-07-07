@@ -1,6 +1,6 @@
 import valueParser from 'postcss-value-parser';
 import stylelint from 'stylelint';
-import { physicalProp, physical2Prop, physicalShorthandProp, physical4Prop, physicalValue, migrationNoneSpec, propsThatContainPropsInValue } from './lib/maps';
+import { physicalProp, physical2Prop, physicalShorthandProp, physicalShorthandPropLogicalKeyword, physical4Prop, physicalValue, migrationNoneSpec, propsThatContainPropsInValue } from './lib/maps';
 import { validateRuleWithProps } from './lib/validate';
 import ruleName from './lib/rule-name';
 import messages from './lib/messages';
@@ -12,6 +12,7 @@ export default stylelint.createPlugin(ruleName, (method, opts, context) => {
 	const propExceptions = [].concat(Object(opts).except || []);
 	const isAutofix = isContextAutofixing(context);
 	const dir = /^rtl$/i.test(Object(opts).direction) ? 'rtl' : 'ltr';
+	const isLogicalKeyword = Boolean(Object(opts).logicalKeyword);
 
 	return (root, result) => {
 		// validate the method
@@ -109,35 +110,63 @@ export default stylelint.createPlugin(ruleName, (method, opts, context) => {
 				});
 
 
-				// validate or autofix shorthand properties that are not supported
-				physicalShorthandProp.forEach((prop) => {
-					validateRuleWithProps(node, [prop], physicalDecl => { // eslint-disable-line
-						let inputValues = valueParser(physicalDecl.value).nodes.filter(value => value.type !== 'space').map(value => valueParser.stringify(value));
-						if (
-							!isDeclAnException(physicalDecl, propExceptions) &&
-							inputValues.length !== 1
-						) {
+				if (!isLogicalKeyword) {
+				  	// validate or autofix shorthand properties that are not supported
+				  	physicalShorthandProp.forEach((prop) => {
+						validateRuleWithProps(node, [prop], physicalDecl => { // eslint-disable-line
+							let inputValues = valueParser(physicalDecl.value).nodes.filter(value => value.type !== 'space').map(value => valueParser.stringify(value));
+							if (
+								!isDeclAnException(physicalDecl, propExceptions) &&
+								inputValues.length !== 1
+							) {
 
-							if (isAutofix) {
-								let outputValues = convertShorthandValues(inputValues, dir);
+								if (isAutofix) {
+									let outputValues = convertShorthandValues(inputValues, dir);
 
-								['block', 'inline'].forEach(type => {
-									physicalDecl.cloneBefore({
-										prop: prop + "-" + type,
-										value: outputValues[type]
-									});
-								})
+									['block', 'inline'].forEach(type => {
+										physicalDecl.cloneBefore({
+											prop: prop + "-" + type,
+											value: outputValues[type]
+										});
+									})
 
-								physicalDecl.remove();
+									physicalDecl.remove();
 
-							} else if (!isDeclReported(physicalDecl)) {
-								reportUnexpectedProperty(physicalDecl, `${prop}-block and ${prop}-inline`);
+								} else if (!isDeclReported(physicalDecl)) {
+									reportUnexpectedProperty(physicalDecl, `${prop}-block and ${prop}-inline`);
 
-								reportedDecls.set(physicalDecl);
-							}
-						}
+									reportedDecls.set(physicalDecl);
+								}
+						  }
+						});
+				  });
+				}
+
+				if (isLogicalKeyword) {
+					physicalShorthandPropLogicalKeyword.forEach((prop) => {
+						validateRuleWithProps(node, [prop], physicalDecl => { // eslint-disable-line
+							let inputValues = valueParser(physicalDecl.value).nodes.filter(value => value.type !== 'space').map(value => valueParser.stringify(value));
+							if (
+							  	!isDeclAnException(physicalDecl, propExceptions) && inputValues[0] !== 'logical'
+							) {
+								let value;
+								if (dir === 'rtl' && inputValues.length === 4) {
+								  	value = ['logical', inputValues[0], inputValues[3], inputValues[2], inputValues[1]].join(' ');
+								} else {
+								  	value = 'logical ' + physicalDecl.value;
+								}
+
+								if (isAutofix) {
+								 	 physicalDecl.value = value;
+								} else if (!isDeclReported(physicalDecl)) {
+									reportUnexpectedValue(physicalDecl, value);
+
+									reportedDecls.set(physicalDecl);
+								}
+						  	}
+						});
 					});
-				});
+				}
 
 				// validate or autofix 2 physical properties as logical shorthands
 				physical2Prop(dir).forEach(([props, prop]) => {

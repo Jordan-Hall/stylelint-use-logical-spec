@@ -376,5 +376,34 @@ module.exports = {
 			warnings: 2,
 			args: "always",
 		},
+		{
+		  source: "body { margin: 20px 30px 10px 40px; }",
+		  expect: "body { margin: logical 20px 30px 10px 40px; }",
+		  args: ["always", {logicalKeyword: true}],
+		  warnings: 0,
+		},
+		{
+		  source: "body { margin: logical 20px 30px 10px 40px; }",
+		  args: ["always", {logicalKeyword: true}],
+		  warnings: 0,
+		},
+		{
+		  source: "body { margin: 20px 30px 10px 40px; }",
+		  expect: "body { margin: logical 20px 40px 10px 30px; }",
+		  args: ["always", { direction: "rtl", logicalKeyword: true }],
+		  warnings: 0,
+		},
+		{
+		  source: "body { margin: calc(20px * 1) calc(30px * 1) calc(40px * 1) calc(10px * 1); }",
+		  expect: "body { margin: logical calc(20px * 1) calc(10px * 1) calc(40px * 1) calc(30px * 1); }",
+		  args: ["always", { direction: "rtl", logicalKeyword: true }],
+		  warnings: 0,
+		},
+		{
+		  source: "body { padding: 20px 0; }",
+		  expect: "body { padding: logical 20px 0; }",
+		  args: ["always", {logicalKeyword: true}],
+		  warnings: 0,
+		},
 	],
 };

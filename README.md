@@ -181,6 +181,18 @@ properties and values should be reported or autofixed.
 }
 ```
 
+### logicalKeyword
+
+The `logicalKeyword` option enables experimental `logical` keyword for `margin` and `padding` physical properties.
+
+```js
+{
+  "rules": {
+    "liberty/use-logical-spec": ["always", { "logicalKeyword": true }]
+  }
+}
+```
+
 ## Property and Value Mapping
 
 Assuming _left to right_ directionality:
