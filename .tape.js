@@ -385,6 +385,11 @@ module.exports = {
 			source: "max-width: 250rem;",
 			expect: "max-inline-size: 250rem;",
 			args: "always",
+		},
+		{
+			source: "padding: ${props => props ? 1 : 2};",
+			warnings: 1,
+			args: "always",
 		},		
 	],
 };

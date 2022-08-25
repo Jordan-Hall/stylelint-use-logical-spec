@@ -8,9 +8,12 @@ import walk from './lib/walk';
 
 const reportedDecls = new WeakMap();
 
+// Ignore autofix on those expression value
+const expressionRegex = /^\$\{.*\}$/g;
+
 export default stylelint.createPlugin(ruleName, (method, opts, context) => {
 	const propExceptions = [].concat(Object(opts).except || []);
-	const isAutofix = isContextAutofixing(context);
+	const isAutofixable = (node) => isContextAutofixing(context) && !expressionRegex.test(node.value);
 	const dir = /^rtl$/i.test(Object(opts).direction) ? 'rtl' : 'ltr';
 
 	return (root, result) => {
@@ -52,7 +55,7 @@ export default stylelint.createPlugin(ruleName, (method, opts, context) => {
 				migrationNoneSpec.forEach(([prop, props]) => {
 					validateRuleWithProps(node, prop, (outDateDecl) => {
 						console.warn(`Property ${prop[0]} is not part of Logical standards.`);
-						if (isAutofix) {
+						if (isAutofixable(node)) {
 							console.warn(`Migrating ${prop[0]} to Logical standards.`);
 							const value = outDateDecl.value;
 							outDateDecl.cloneBefore({
@@ -86,7 +89,7 @@ export default stylelint.createPlugin(ruleName, (method, opts, context) => {
 							!isDeclAnException(inlineEndDecl, propExceptions) &&
 							values.length === 1 // only report issues if there is 1 value after shortening
 						) {
-							if (isAutofix) {
+							if (isAutofixable(node)) {
 								firstInlineDecl.cloneBefore({
 									prop,
 									value: values.join(' ')
@@ -118,7 +121,7 @@ export default stylelint.createPlugin(ruleName, (method, opts, context) => {
 							inputValues.length !== 1
 						) {
 
-							if (isAutofix) {
+							if (isAutofixable(node)) {
 								let outputValues = convertShorthandValues(inputValues, dir);
 
 								['block', 'inline'].forEach(type => {
@@ -147,7 +150,7 @@ export default stylelint.createPlugin(ruleName, (method, opts, context) => {
 							: endDecl;
 
 						if (!isDeclAnException(startDecl, propExceptions) && !isDeclAnException(endDecl, propExceptions)) {
-							if (isAutofix) {
+							if (isAutofixable(node)) {
 								firstInlineDecl.cloneBefore({
 									prop,
 									value: startDecl.value === endDecl.value
@@ -171,7 +174,7 @@ export default stylelint.createPlugin(ruleName, (method, opts, context) => {
 				physicalProp(dir).forEach(([props, prop]) => {
 					validateRuleWithProps(node, props, physicalDecl => {
 						if (!isDeclAnException(physicalDecl, propExceptions)) {
-							if (isAutofix) {
+							if (isAutofixable(node)) {
 								physicalDecl.prop = prop;
 							} else if (!isDeclReported(physicalDecl)) {
 								reportUnexpectedProperty(physicalDecl, prop);
@@ -190,7 +193,7 @@ export default stylelint.createPlugin(ruleName, (method, opts, context) => {
 						if (valuekey in props) {
 							const value = props[valuekey];
 
-							if (isAutofix) {
+							if (isAutofixable(node)) {
 								node.value = value;
 							} else {
 								reportUnexpectedValue(node, value);
@@ -221,7 +224,7 @@ export default stylelint.createPlugin(ruleName, (method, opts, context) => {
 					});
 
 					if (value !== originalValue) {
-						if (isAutofix) {
+						if (isAutofixable(node)) {
 							node.value = value;
 						} else {
 							reportUnexpectedValue(node, value);
