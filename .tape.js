@@ -376,5 +376,20 @@ module.exports = {
 			warnings: 2,
 			args: "always",
 		},
+		{
+			source: "body { margin: 20px; }",
+			expect: "body { margin: 20px; }",
+			args: "always",
+		},
+		{
+			source: "body { margin: map-get($spacers, 4); }",
+			expect: "body { margin: map-get($spacers, 4); }",
+			args: "always",
+		},
+		{
+			source: "body { margin: map-get($spacers, 4) map-get($spacers, 2); }",
+			expect: "body { margin-block: map-get($spacers, 4); margin-inline: map-get($spacers, 2); }",
+			args: "always",
+		},
 	],
 };
