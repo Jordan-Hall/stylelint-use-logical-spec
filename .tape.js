@@ -376,5 +376,20 @@ module.exports = {
 			warnings: 2,
 			args: "always",
 		},
+		{
+			source: "margin-start: 0;",
+			expect: "margin-block-start: 0;margin-inline-start: 0;",
+			args: "always",
+		},
+		{
+			source: "max-width: 250rem;",
+			expect: "max-inline-size: 250rem;",
+			args: "always",
+		},
+		{
+			source: "padding: ${props => props ? 1 : 2};",
+			warnings: 1,
+			args: "always",
+		},		
 	],
 };
