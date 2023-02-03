@@ -377,6 +377,20 @@ module.exports = {
 			args: "always",
 		},
 		{
+			source: "body { margin: 20px; }",
+			expect: "body { margin: 20px; }",
+			args: "always",
+		},
+		{
+			source: "body { margin: map-get($spacers, 4); }",
+			expect: "body { margin: map-get($spacers, 4); }",
+			args: "always",
+		},
+		{
+			source: "body { margin: map-get($spacers, 4) map-get($spacers, 2); }",
+			expect: "body { margin-block: map-get($spacers, 4); margin-inline: map-get($spacers, 2); }",
+			args: "always",
+		},
 			source: "margin-start: 0;",
 			expect: "margin-block-start: 0;margin-inline-start: 0;",
 			args: "always",
@@ -390,6 +404,6 @@ module.exports = {
 			source: "padding: ${props => props ? 1 : 2};",
 			warnings: 1,
 			args: "always",
-		},		
+		},
 	],
 };
