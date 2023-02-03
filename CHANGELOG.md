@@ -1,5 +1,12 @@
 # Changes to Property Use Logical
 
+## 5.0.0 (February 3rd, 2023)
+  ### New feature
+  - Add support for CSS in JS #35
+
+  ###  Fixes
+  - Fix shorthand properties that uses calc  #28
+
 ## 4.1.0 (June 3rd, 2022)
 
 #22

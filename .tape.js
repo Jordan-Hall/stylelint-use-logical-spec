@@ -391,6 +391,7 @@ module.exports = {
 			expect: "body { margin-block: map-get($spacers, 4); margin-inline: map-get($spacers, 2); }",
 			args: "always",
 		},
+		{
 			source: "margin-start: 0;",
 			expect: "margin-block-start: 0;margin-inline-start: 0;",
 			args: "always",
