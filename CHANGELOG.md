@@ -1,5 +1,9 @@
 # Changes to Property Use Logical
 
+## 5.0.1
+  ### fixes
+  - add support for stylelint 16
+
 ## 5.0.0 (February 3rd, 2023)
   ### New feature
   - Add support for CSS in JS #35

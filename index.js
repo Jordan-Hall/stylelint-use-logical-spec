@@ -11,7 +11,7 @@ const reportedDecls = new WeakMap();
 // Ignore autofix on those expression value
 const expressionRegex = /^\$\{.*\}$/g;
 
-export default stylelint.createPlugin(ruleName, (method, opts, context) => {
+function ruleFunc(method, opts, context) {
 	const propExceptions = [].concat(Object(opts).except || []);
 	const isAutofixable = (node) => isContextAutofixing(context) && !expressionRegex.test(node.value);
 	const dir = /^rtl$/i.test(Object(opts).direction) ? 'rtl' : 'ltr';
@@ -49,9 +49,6 @@ export default stylelint.createPlugin(ruleName, (method, opts, context) => {
 
 		if (isMethodValid && isMethodAlways(method)) {
 			walk(root, node => {
-
-				// MIGRATION from out of date props https://github.com/csstools/stylelint-use-logical/issues/1
-
 				migrationNoneSpec.forEach(([prop, props]) => {
 					validateRuleWithProps(node, prop, (outDateDecl) => {
 						console.warn(`Property ${prop[0]} is not part of Logical standards.`);
@@ -236,9 +233,9 @@ export default stylelint.createPlugin(ruleName, (method, opts, context) => {
 			});
 		}
 	};
-});
-
-export { ruleName }
+}
+ruleFunc.ruleName = ruleName;
+export default stylelint.createPlugin(ruleName, ruleFunc);
 
 const isMethodIndifferent = method => method === 'ignore' || method === false || method === null;
 const isMethodAlways = method => method === 'always' || method === true;
