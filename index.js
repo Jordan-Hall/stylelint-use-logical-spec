@@ -115,7 +115,7 @@ function ruleFunc(method, opts, context) {
 						const inputValues = cssValueSplit(physicalDecl.value);
 						if (
 							!isDeclAnException(physicalDecl, propExceptions) &&
-							inputValues.length !== 1
+							shouldConvertShorthandValues(inputValues)
 						) {
 
 							if (isAutofixable(node)) {
@@ -257,6 +257,16 @@ const shorthandValueShorten = values => {
 		values.pop();
 	}
 	return values;
+};
+
+const shouldConvertShorthandValues = (input) => {
+	if (input.length === 3) {
+		return input[0] !== input[2];
+	}
+	if (input.length === 4) {
+		return input[0] !== input[2] || input[1] !== input[3];
+	}
+	return false;
 };
 
 const convertShorthandValues = (input, dir) => {

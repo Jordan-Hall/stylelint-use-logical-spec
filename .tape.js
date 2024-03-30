@@ -122,7 +122,7 @@ module.exports = {
 		},
 		{
 			source: "body { padding: 20px 0; }",
-			expect: "body { padding-block: 20px; padding-inline: 0; }",
+			expect: "body { padding: 20px 0; }",
 			args: "always",
 		},
 		{
@@ -388,7 +388,7 @@ module.exports = {
 		},
 		{
 			source: "body { margin: map-get($spacers, 4) map-get($spacers, 2); }",
-			expect: "body { margin-block: map-get($spacers, 4); margin-inline: map-get($spacers, 2); }",
+			expect: "body { margin: map-get($spacers, 4) map-get($spacers, 2); }",
 			args: "always",
 		},
 		{
@@ -405,6 +405,26 @@ module.exports = {
 			source: "padding: ${props => props ? 1 : 2};",
 			warnings: 1,
 			args: "always",
+		},
+		{
+			source: "body: { padding: 10px 20px 10px 20px; }",
+			expect: "body: { padding: 10px 20px 10px 20px; }",
+			args: "always"
+		},
+		{
+			source: "body: { padding: 10px 20px 10px; }",
+			expect: "body: { padding: 10px 20px 10px; }",
+			args: "always"
+		},
+		{
+			source: "body: { padding: 10px 20px 30px; }",
+			expect: "body: { padding-block: 10px 30px; padding-inline: 20px; }",
+			args: "always"
+		},
+		{
+			source: "body: { padding: 0px 20px 0; }",
+			expect: "body: { padding-block: 0px 0; padding-inline: 20px; }",
+			args: "always"
 		},
 	],
 };
