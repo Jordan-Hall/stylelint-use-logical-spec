@@ -21,7 +21,7 @@
     "prepublishOnly": "npm test",
     "pretest": "rollup -c .rollup.js --silent",
     "test": "npm run test:js && npm run test:tape",
-    "test:js": "eslint *.js lib/*.js --cache --ignore-path .gitignore --quiet",
+    "test:js": "eslint *.js lib/*.js --cache --quiet",
     "test:tape": "stylelint-tape"
   },
   "engines": {
@@ -31,20 +31,14 @@
     "@babel/core": "^7.12.3",
     "@babel/preset-env": "^7.12.1",
     "@rollup/plugin-babel": "^5.2.1",
-    "babel-eslint": "^10.1.0",
-    "eslint": "^7.13.0",
-    "eslint-config-dev": "^2.0.0",
+    "eslint": "^4.19.1",
     "pre-commit": "^1.2.2",
     "rollup": "^2.33.1",
-    "stylelint": "^13.7.2",
+    "stylelint": "^17.0.0",
     "stylelint-tape": "^2.0.0"
   },
   "peerDependencies": {
-    "stylelint": ">=11 < 17"
-  },
-  "eslintConfig": {
-    "extends": "dev",
-    "parser": "babel-eslint"
+    "stylelint": ">=11 < 18"
   },
   "keywords": [
     "stylelint",
