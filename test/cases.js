@@ -888,4 +888,11 @@ export default [
 		warnings: 0,
 		args: ["always", { except: ["x", "width", "min-width"] }]
 	},
+	{
+		// a later !important side keeps its importance
+		source: 'a { margin-top: 1px; margin-bottom: 2px !important }',
+		expect: 'a { margin-block-start: 1px; margin-block-end: 2px !important }',
+		warnings: 2,
+		args: 'always'
+	},
 ];
