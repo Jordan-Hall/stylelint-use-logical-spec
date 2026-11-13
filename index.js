@@ -124,7 +124,7 @@ function ruleFunc(method, opts) {
 			}
 		});
 
-		walk(root, node => {
+		const check = node => {
 			// non-standard and vendor-prefixed logical properties become standard ones
 			const legacy = node.type === 'decl' && legacyProps[node.prop.toLowerCase()];
 
@@ -373,7 +373,11 @@ function ruleFunc(method, opts) {
 					});
 				}
 			}
-		});
+		};
+
+		// the root too, so top-level declarations (CSS-in-JS, style attributes) merge like rule bodies
+		check(root);
+		walk(root, check);
 	};
 }
 
@@ -383,6 +387,8 @@ ruleFunc.meta = {
 	url: 'https://github.com/Jordan-Hall/stylelint-use-logical-spec#readme',
 	fixable: true
 };
+
+export { ruleName };
 
 export default stylelint.createPlugin(ruleName, ruleFunc);
 

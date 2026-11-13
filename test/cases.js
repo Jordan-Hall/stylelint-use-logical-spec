@@ -819,8 +819,8 @@ export default [
 	},
 	{
 		source: "a { position-area: span-right bottom; inset-area: x-start y-self-end }",
-		expect: "a { position-area: span-inline-end block-end; inset-area: inline-start self-block-end }",
-		warnings: 2,
+		expect: "a { position-area: span-inline-end block-end; position-area: inline-start self-block-end }",
+		warnings: 3,
 		args: "always"
 	},
 	{
@@ -894,5 +894,19 @@ export default [
 		expect: 'a { margin-block-start: 1px; margin-block-end: 2px !important }',
 		warnings: 2,
 		args: 'always'
+	},
+	{
+		// top-level declarations merge like a rule body
+		source: 'margin-top: 1px; margin-bottom: 1px; top: 0; right: 0; bottom: 0; left: 0',
+		expect: 'margin-block: 1px; inset: 0',
+		warnings: 2,
+		args: 'always'
+	},
+	{
+		source: "const A = styled.div`\n  padding-left: 1px;\n  padding-right: 2px;\n`;",
+		expect: "const A = styled.div`\n  padding-inline: 1px 2px;\n`;",
+		warnings: 1,
+		args: 'always',
+		customSyntax: 'postcss-styled-syntax'
 	},
 ];
