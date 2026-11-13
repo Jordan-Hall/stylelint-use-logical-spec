@@ -179,22 +179,51 @@ matching a case-insensitive string or regular expression.
 }
 ```
 
-### direction
+### writingMode and direction
 
-The `direction` option controls whether _left to right_ or _right to left_
-properties and values should be reported or autofixed.
+`writingMode` and `direction` describe the content the same way the CSS
+`writing-mode` and `direction` properties do. Together they decide which
+physical side is block-start, block-end, inline-start and inline-end, so
+every mapping (sides, sizes, corners, axes, keywords and units) follows them.
+
+| Option        | Values                                                                     | Default         |
+| ------------- | -------------------------------------------------------------------------- | --------------- |
+| `writingMode` | `horizontal-tb`, `vertical-rl`, `vertical-lr`, `sideways-rl`, `sideways-lr` | `horizontal-tb` |
+| `direction`   | `ltr`, `rtl`                                                               | `ltr`           |
 
 ```js
 {
   "rules": {
-    "liberty/use-logical-spec": ["always", { "direction": "ltr" || "rtl" }]
+    "liberty/use-logical-spec": ["always", { "writingMode": "vertical-rl", "direction": "ltr" }]
   }
 }
 ```
 
+With `vertical-rl`, `margin-right` becomes `margin-block-start`,
+`margin-top` becomes `margin-inline-start`, `width` becomes `block-size`
+and `100vw` becomes `100vb`.
+
+When neither option is set, the rule uses stylelint's
+[`languageOptions.directionality`](https://stylelint.io/user-guide/configure#languageoptions)
+if your config has one, so this rule and stylelint's built-in layout rules
+agree:
+
+```js
+{
+  "languageOptions": {
+    "directionality": { "block": "right-to-left", "inline": "top-to-bottom" }
+  }
+}
+```
+
+In vertical writing modes, `left` and `right` in `float`, `clear` and
+`text-align` are on the block axis and have no logical keyword, so they are
+not reported.
+
 ## Property and Value Mapping
 
-Assuming _left to right_ directionality:
+The tables assume `horizontal-tb` and `ltr`. Other writing modes and
+directions move each physical side to its matching logical side.
 
 # Positioning
 
@@ -295,6 +324,7 @@ Pairs of sides merge into an axis shorthand, for example `margin-top` and
 | `float`, `clear`             | `left` / `right`        | `inline-start` / `inline-end` |
 | `text-align`, `text-align-last` | `left` / `right`   | `start` / `end`           |
 | `resize`                     | `horizontal` / `vertical` | `inline` / `block`      |
+| `offset-anchor`, `offset-position` | `top` / `bottom` / `left` / `right` | `block-start` / `block-end` / `inline-start` / `inline-end` |
 
 Physical property names inside `transition`, `transition-property` and
 `will-change` values are mapped too.
@@ -312,9 +342,11 @@ Add a unit to `except` (for example `{ "except": ["vw"] }`) to keep it.
 
 stylelint 17.12 and later include `property-layout-mappings`,
 `value-keyword-layout-mappings` and `unit-layout-mappings`. This plugin
-adds the `direction: "rtl"` option, mapping inside `transition` and
-`will-change` values, migration of the non-standard `margin-start`-style
-properties, and support for stylelint 16.
+reads the same `languageOptions.directionality`, and also offers
+`writingMode`/`direction` options, merging of side pairs into axis
+shorthands, mapping inside `transition` and `will-change` values, migration
+of the non-standard `margin-start`-style properties, and support for
+stylelint 16.
 
 ## Special thanks
 Codebase off https://github.com/csstools/stylelint-use-logical
