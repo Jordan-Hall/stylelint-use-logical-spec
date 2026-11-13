@@ -402,6 +402,12 @@ export default [
 		args: "always",
 	},
 	{
+		// Original tape case: plain CSS cannot parse a JS interpolation, so this reports one CssSyntaxError
+		source: 'padding: ${props => props ? 1 : 2};',
+		warnings: 1,
+		args: 'always'
+	},
+	{
 		// CSS-in-JS: interpolations are left alone, plain declarations are fixed
 		source: "const A = styled.div`\n  padding: ${p => p.x};\n  margin-left: 0;\n  width: 100vw;\n`;",
 		expect: "const A = styled.div`\n  padding: ${p => p.x};\n  margin-inline-start: 0;\n  inline-size: 100vi;\n`;",

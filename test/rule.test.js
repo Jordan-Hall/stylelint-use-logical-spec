@@ -30,6 +30,10 @@ describe(`${ruleName} (stylelint ${version})`, () => {
 			test(`fixes: ${label}`, async () => {
 				const { code } = await lint(source, args, { fix: true, customSyntax, languageOptions });
 				assert.equal(code, expect);
+
+				// the fixed output must itself be clean
+				const { results: [relinted] } = await lint(code, args, { customSyntax, languageOptions });
+				assert.deepEqual(relinted.warnings.map(w => w.text), []);
 			});
 		}
 	}
