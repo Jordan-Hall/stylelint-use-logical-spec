@@ -37,6 +37,20 @@ const resolveDirectionality = (opts, result) => {
 	return toDirectionality(writingMode, direction);
 };
 
+/**
+ * True when a declaration between the first and last of `indexes` sets one of the
+ * same sides. Merging around it would change which value wins the cascade.
+ */
+const hasInterveningOverride = (node, indexes, touches) => {
+	const { nodes = [node] } = node;
+	const first = Math.min(...indexes);
+	const last = Math.max(...indexes);
+
+	return nodes.slice(first + 1, last).some(child => child.type === 'decl'
+		&& !indexes.includes(nodes.indexOf(child))
+		&& touches.has(child.prop.toLowerCase()));
+};
+
 const isString = value => typeof value === 'string';
 const isRegExp = value => value instanceof RegExp;
 
@@ -124,12 +138,14 @@ function ruleFunc(method, opts) {
 			});
 
 			// 4 physical properties become a logical shorthand only when every value is equal
-			physical4Prop.forEach(([props, prop]) => {
-				validateRuleWithProps(node, props, (blockStartDecl, _a, inlineStartDecl, _b, blockEndDecl, _c, inlineEndDecl) => {
+			physical4Prop.forEach(([props, prop, touches]) => {
+				validateRuleWithProps(node, props, (blockStartDecl, a, inlineStartDecl, b, blockEndDecl, c, inlineEndDecl, d) => {
 					const decls = [blockStartDecl, inlineStartDecl, blockEndDecl, inlineEndDecl];
 					const values = new Set(decls.map(decl => decl.value));
 
-					if (values.size === 1 && !decls.some(decl => isDeclAnException(decl, propExceptions))) {
+					if (values.size === 1
+						&& !decls.some(decl => isDeclAnException(decl, propExceptions))
+						&& !hasInterveningOverride(node, [a, b, c, d], touches)) {
 						report({
 							message: messages.unexpectedProp(blockStartDecl.prop, prop),
 							decls,
@@ -166,9 +182,11 @@ function ruleFunc(method, opts) {
 			});
 
 			// 2 physical properties become a logical shorthand
-			physical2Prop.forEach(([props, prop]) => {
+			physical2Prop.forEach(([props, prop, touches]) => {
 				validateRuleWithProps(node, props, (startDecl, startIndex, endDecl, endIndex) => {
-					if (!isDeclAnException(startDecl, propExceptions) && !isDeclAnException(endDecl, propExceptions)) {
+					if (!isDeclAnException(startDecl, propExceptions)
+						&& !isDeclAnException(endDecl, propExceptions)
+						&& !hasInterveningOverride(node, [startIndex, endIndex], touches)) {
 						const firstDecl = startIndex < endIndex ? startDecl : endDecl;
 
 						report({
