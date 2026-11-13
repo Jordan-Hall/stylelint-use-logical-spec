@@ -5,6 +5,9 @@
   - Requires stylelint `^16.7.0 || ^17 || ^18` and Node.js `>=22`
   - Published as a native ES module; the `index.cjs.js` and `index.es.mjs` builds are removed
   - `direction` must be exactly `"ltr"` or `"rtl"` (other values are now invalid options)
+  - `margin-start`, `margin-end`, `padding-start`, `padding-end`, `inset-start` and
+    `inset-end` now map to the inline side only (`margin-start` → `margin-inline-start`),
+    as the engines that used them did. Before, they became both a block and an inline property
 
   ### New
   - Vertical writing modes: `writingMode` option (`horizontal-tb`, `vertical-rl`,
@@ -18,9 +21,19 @@
   - Multi-value `border-width`, `border-style`, `border-color`, `scroll-margin`,
     `scroll-padding`, `overflow` and `overscroll-behavior` split by axis
   - `resize: horizontal/vertical` → `inline/block` and `text-align-last` (#11)
+  - Vendor-prefixed logical properties (`-webkit-margin-start`, `-moz-padding-end`,
+    `-webkit-margin-before`, `-webkit-border-start-color`, `-webkit-logical-width`, ...)
+  - Anchor positioning: `position-area` (and `inset-area`, `position-try`,
+    `position-try-fallbacks`) keywords, `position-try-order`, `anchor-size(width/height)`
+  - `x`/`y` axes in `scroll-snap-type`, `scroll-timeline(-axis)`, `view-timeline(-axis)`,
+    `scroll()` and `view()`
+  - `contain-intrinsic-size: w h` splits by axis
+  - `@container` size features: `(min-width: 1px)` → `(min-inline-size: 1px)`
   - Viewport and container units `vw/vh` (and `sv*`, `lv*`, `dv*`, `cq*`) → `vi/vb` (#38)
 
   ### Fixes
+  - Autofix no longer changes the cascade: sides are not merged around a declaration
+    that sets the same side, or when their `!important` flags differ
   - Autofix works again on stylelint 17 and 18 (uses the `report({ fix })` API)
   - The CSS-in-JS expression check no longer alternates between results (stateful `/g` regex)
   - No more `console.warn` output for the non-standard `margin-start`-style properties

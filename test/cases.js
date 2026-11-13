@@ -2,12 +2,12 @@
 export default [
 	{
 		source: "body { margin-start: 0; }",
-		expect: "body { margin-block-start: 0; margin-inline-start: 0; }",
+		expect: "body { margin-inline-start: 0; }",
 		args: "always",
 	},
 	{
 		source: "body { margin-end: 0; }",
-		expect: "body { margin-block-end: 0; margin-inline-end: 0; }",
+		expect: "body { margin-inline-end: 0; }",
 		args: "always",
 	},
 	{
@@ -393,7 +393,7 @@ export default [
 	},
 	{
 		source: "margin-start: 0;",
-		expect: "margin-block-start: 0;margin-inline-start: 0;",
+		expect: "margin-inline-start: 0;",
 		args: "always",
 	},
 	{
@@ -720,5 +720,172 @@ export default [
 		expect: 'a { margin-block: 1px; margin-inline-start: 2px }',
 		warnings: 1,
 		args: 'always'
+	},
+	{
+		source: "a { margin-top: 1px !important; margin-bottom: 1px }",
+		expect: "a { margin-block-start: 1px !important; margin-block-end: 1px }",
+		warnings: 2,
+		args: "always"
+	},
+	{
+		source: "a { top: 0 !important; right: 0; bottom: 0; left: 0 }",
+		expect: "a { inset-block-start: 0 !important; inset-inline: 0; inset-block-end: 0 }",
+		warnings: 3,
+		args: "always"
+	},
+	{
+		source: "a { margin-top: 1px !important; margin-bottom: 1px !important }",
+		expect: "a { margin-block: 1px !important }",
+		warnings: 1,
+		args: "always"
+	},
+	{
+		source: "a { -webkit-margin-start: 0; -moz-margin-end: 0; -webkit-margin-before: 0; -webkit-margin-after: 0 }",
+		expect: "a { margin-inline-start: 0; margin-inline-end: 0; margin-block-start: 0; margin-block-end: 0 }",
+		warnings: 4,
+		args: "always"
+	},
+	{
+		source: "a { -webkit-padding-start: 0; -moz-padding-end: 0; padding-start: 0; inset-start: 0; inset-end: 0 }",
+		expect: "a { padding-inline-start: 0; padding-inline-end: 0; padding-inline-start: 0; inset-inline-start: 0; inset-inline-end: 0 }",
+		warnings: 5,
+		args: "always"
+	},
+	{
+		source: "a { -webkit-border-start: 1px solid; -moz-border-end-color: red; -webkit-border-before-width: 1px }",
+		expect: "a { border-inline-start: 1px solid; border-inline-end-color: red; border-block-start-width: 1px }",
+		warnings: 3,
+		args: "always"
+	},
+	{
+		source: "a { -webkit-logical-width: 1px; -webkit-min-logical-height: 1px; -webkit-max-logical-width: 1px }",
+		expect: "a { inline-size: 1px; min-block-size: 1px; max-inline-size: 1px }",
+		warnings: 3,
+		args: "always"
+	},
+	{
+		source: "a { scroll-snap-type: x mandatory }",
+		expect: "a { scroll-snap-type: inline mandatory }",
+		warnings: 1,
+		args: "always"
+	},
+	{
+		source: "a { scroll-snap-type: both; scroll-timeline-axis: y; view-timeline-axis: x }",
+		expect: "a { scroll-snap-type: both; scroll-timeline-axis: block; view-timeline-axis: inline }",
+		warnings: 2,
+		args: "always"
+	},
+	{
+		source: "a { scroll-timeline: --x x; view-timeline: --y y }",
+		expect: "a { scroll-timeline: --x inline; view-timeline: --y block }",
+		warnings: 2,
+		args: "always"
+	},
+	{
+		source: "a { animation-timeline: scroll(root x), view(y 10px) }",
+		expect: "a { animation-timeline: scroll(root inline), view(block 10px) }",
+		warnings: 1,
+		args: "always"
+	},
+	{
+		source: "a { contain-intrinsic-size: 10px 20px }",
+		expect: "a { contain-intrinsic-block-size: 20px; contain-intrinsic-inline-size: 10px }",
+		warnings: 1,
+		args: "always"
+	},
+	{
+		source: "a { contain-intrinsic-size: auto 10px auto 20px }",
+		expect: "a { contain-intrinsic-block-size: auto 20px; contain-intrinsic-inline-size: auto 10px }",
+		warnings: 1,
+		args: "always"
+	},
+	{
+		source: "a { contain-intrinsic-size: auto 10px }",
+		expect: "a { contain-intrinsic-size: auto 10px }",
+		warnings: 0,
+		args: "always"
+	},
+	{
+		source: "a { width: anchor-size(width); max-height: anchor-size(--a height, 10vh) }",
+		expect: "a { inline-size: anchor-size(inline); max-block-size: anchor-size(--a block, 10vb) }",
+		warnings: 4,
+		args: "always"
+	},
+	{
+		source: "a { position-area: top left }",
+		expect: "a { position-area: block-start inline-start }",
+		warnings: 1,
+		args: "always"
+	},
+	{
+		source: "a { position-area: span-right bottom; inset-area: x-start y-self-end }",
+		expect: "a { position-area: span-inline-end block-end; inset-area: inline-start self-block-end }",
+		warnings: 2,
+		args: "always"
+	},
+	{
+		source: "a { position-area: center span-all }",
+		expect: "a { position-area: center span-all }",
+		warnings: 0,
+		args: "always"
+	},
+	{
+		source: "a { position-try-order: most-width; position-try: most-height flip-block, --custom, top }",
+		expect: "a { position-try-order: most-inline-size; position-try: most-block-size flip-block, --custom, block-start }",
+		warnings: 2,
+		args: "always"
+	},
+	{
+		source: "a { position-try-fallbacks: flip-inline, right span-y-start }",
+		expect: "a { position-try-fallbacks: flip-inline, inline-end span-block-start }",
+		warnings: 1,
+		args: "always"
+	},
+	{
+		source: "@container (min-width: 400px) { a { color: red } }",
+		expect: "@container (min-inline-size: 400px) { a { color: red } }",
+		warnings: 1,
+		args: "always"
+	},
+	{
+		source: "@container card (400px < width <= 800px) and (max-height: 1px) { a { color: red } }",
+		expect: "@container card (400px < inline-size <= 800px) and (max-block-size: 1px) { a { color: red } }",
+		warnings: 1,
+		args: "always"
+	},
+	{
+		source: "@container (min-inline-size: 1px) and style(--width: 1) {}",
+		expect: "@container (min-inline-size: 1px) and style(--width: 1) {}",
+		warnings: 0,
+		args: "always"
+	},
+	{
+		source: "@media (min-width: 400px) { a { color: red } }",
+		expect: "@media (min-width: 400px) { a { color: red } }",
+		warnings: 0,
+		args: "always"
+	},
+	{
+		source: "a { position-area: top left; height: anchor-size(width); scroll-snap-type: y }",
+		expect: "a { position-area: inline-start block-end; inline-size: anchor-size(block); scroll-snap-type: inline }",
+		warnings: 4,
+		args: ["always",{"writingMode":"vertical-rl"}]
+	},
+	{
+		source: "@container (width > 1px) {}",
+		expect: "@container (block-size > 1px) {}",
+		warnings: 1,
+		args: ["always",{"writingMode":"vertical-rl"}]
+	},
+	{
+		source: "a { contain-intrinsic-size: 10px 20px }",
+		expect: "a { contain-intrinsic-block-size: 10px; contain-intrinsic-inline-size: 20px }",
+		warnings: 1,
+		args: ["always",{"writingMode":"vertical-rl"}]
+	},
+	{
+		source: "a { scroll-snap-type: x; width: anchor-size(width) } @container (min-width: 1px) {}",
+		warnings: 0,
+		args: ["always", { except: ["x", "width", "min-width"] }]
 	},
 ];
