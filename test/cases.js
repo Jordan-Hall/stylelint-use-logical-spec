@@ -688,4 +688,37 @@ export default [
 		args: ["always",{"writingMode":"horizontal-tb"}],
 		languageOptions: {"directionality":{"block":"right-to-left","inline":"top-to-bottom"}},
 	},
+	{
+		// a logical override between the pair keeps its cascade position: rename in place, no merge
+		source: 'a { border-top-color: red; border-block-end-color: blue; border-bottom-color: red }',
+		expect: 'a { border-block-start-color: red; border-block-end-color: blue; border-block-end-color: red }',
+		warnings: 2,
+		args: 'always'
+	},
+	{
+		source: 'a { margin-top: 1px; margin-block-start: 2px; margin-bottom: 1px }',
+		expect: 'a { margin-block-start: 1px; margin-block-start: 2px; margin-block-end: 1px }',
+		warnings: 2,
+		args: 'always'
+	},
+	{
+		source: 'a { top: 0; inset: 1px; left: 0; bottom: 0; right: 0 }',
+		expect: 'a { inset-block-start: 0; inset: 1px; inset-inline: 0; inset-block-end: 0 }',
+		warnings: 3,
+		args: 'always'
+	},
+	{
+		// an unrelated declaration in between does not block the merge
+		source: 'a { margin-top: 1px; color: red; margin-bottom: 1px }',
+		expect: 'a { margin-block: 1px; color: red }',
+		warnings: 1,
+		args: 'always'
+	},
+	{
+		// an override on the other axis does not block the merge
+		source: 'a { margin-top: 1px; margin-inline-start: 2px; margin-bottom: 1px }',
+		expect: 'a { margin-block: 1px; margin-inline-start: 2px }',
+		warnings: 1,
+		args: 'always'
+	},
 ];
