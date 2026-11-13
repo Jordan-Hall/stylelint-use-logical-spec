@@ -514,4 +514,172 @@ export default [
 		warnings: 0,
 		args: ["always",{"except":["vw"]}],
 	},
+	// Writing modes, offset keywords and languageOptions.directionality
+	{
+		source: "body { margin-top: 0; }",
+		expect: "body { margin-inline-start: 0; }",
+		args: ["always",{"writingMode":"vertical-rl"}],
+	},
+	{
+		source: "body { margin-right: 0; }",
+		expect: "body { margin-block-start: 0; }",
+		args: ["always",{"writingMode":"vertical-rl"}],
+	},
+	{
+		source: "body { margin-bottom: 0; }",
+		expect: "body { margin-inline-end: 0; }",
+		args: ["always",{"writingMode":"vertical-rl"}],
+	},
+	{
+		source: "body { margin-left: 0; }",
+		expect: "body { margin-block-end: 0; }",
+		args: ["always",{"writingMode":"vertical-rl"}],
+	},
+	{
+		source: "body { left: 0; }",
+		expect: "body { inset-block-end: 0; }",
+		args: ["always",{"writingMode":"vertical-rl"}],
+	},
+	{
+		source: "body { border-top-color: red; }",
+		expect: "body { border-inline-start-color: red; }",
+		args: ["always",{"writingMode":"vertical-rl"}],
+	},
+	{
+		source: "body { border-right: 0; }",
+		expect: "body { border-block-start: 0; }",
+		args: ["always",{"writingMode":"vertical-rl"}],
+	},
+	{
+		source: "body { width: 1px; height: 2px; }",
+		expect: "body { block-size: 1px; inline-size: 2px; }",
+		warnings: 2,
+		args: ["always",{"writingMode":"vertical-rl"}],
+	},
+	{
+		source: "body { max-width: 1px; min-height: 2px; }",
+		expect: "body { max-block-size: 1px; min-inline-size: 2px; }",
+		args: ["always",{"writingMode":"vertical-rl"}],
+	},
+	{
+		source: "body { contain-intrinsic-width: 1px; }",
+		expect: "body { contain-intrinsic-block-size: 1px; }",
+		args: ["always",{"writingMode":"vertical-rl"}],
+	},
+	{
+		source: "body { margin: 1px 2px 3px 4px; }",
+		expect: "body { margin-block: 2px 4px; margin-inline: 1px 3px; }",
+		warnings: 1,
+		args: ["always",{"writingMode":"vertical-rl"}],
+	},
+	{
+		source: "body { margin-left: 1px; margin-right: 2px; }",
+		expect: "body { margin-block: 2px 1px; }",
+		warnings: 1,
+		args: ["always",{"writingMode":"vertical-rl"}],
+	},
+	{
+		source: "body { border-top-left-radius: 0; }",
+		expect: "body { border-end-start-radius: 0; }",
+		args: ["always",{"writingMode":"vertical-rl"}],
+	},
+	{
+		source: "body { border-top-right-radius: 0; }",
+		expect: "body { border-start-start-radius: 0; }",
+		args: ["always",{"writingMode":"vertical-rl"}],
+	},
+	{
+		source: "body { overflow-x: hidden; }",
+		expect: "body { overflow-block: hidden; }",
+		args: ["always",{"writingMode":"vertical-rl"}],
+	},
+	{
+		source: "body { overflow: hidden auto; }",
+		expect: "body { overflow-block: hidden; overflow-inline: auto; }",
+		args: ["always",{"writingMode":"vertical-rl"}],
+	},
+	{
+		source: "body { float: left; text-align: right; }",
+		warnings: 0,
+		args: ["always",{"writingMode":"vertical-rl"}],
+	},
+	{
+		source: "body { resize: horizontal; }",
+		expect: "body { resize: block; }",
+		args: ["always",{"writingMode":"vertical-rl"}],
+	},
+	{
+		source: "body { block-size: 100vw; }",
+		expect: "body { block-size: 100vb; }",
+		args: ["always",{"writingMode":"vertical-rl"}],
+	},
+	{
+		source: "body { offset-position: left top; }",
+		expect: "body { offset-position: block-end inline-start; }",
+		args: ["always",{"writingMode":"vertical-rl"}],
+	},
+	{
+		source: "body { margin-bottom: 0; }",
+		expect: "body { margin-inline-start: 0; }",
+		args: ["always",{"writingMode":"vertical-rl","direction":"rtl"}],
+	},
+	{
+		source: "body { margin-left: 0; }",
+		expect: "body { margin-block-start: 0; }",
+		args: ["always",{"writingMode":"vertical-lr"}],
+	},
+	{
+		source: "body { border-bottom-left-radius: 0; }",
+		expect: "body { border-start-end-radius: 0; }",
+		args: ["always",{"writingMode":"vertical-lr"}],
+	},
+	{
+		source: "body { margin-right: 0; }",
+		expect: "body { margin-block-start: 0; }",
+		args: ["always",{"writingMode":"sideways-rl"}],
+	},
+	{
+		source: "body { margin-bottom: 0; margin-left: 1px; }",
+		expect: "body { margin-inline-start: 0; margin-block-start: 1px; }",
+		args: ["always",{"writingMode":"sideways-lr"}],
+	},
+	{
+		source: "body { margin-top: 0; }",
+		expect: "body { margin-inline-start: 0; }",
+		args: ["always",{"writingMode":"sideways-lr","direction":"rtl"}],
+	},
+	{
+		source: "body { offset-position: left top; }",
+		expect: "body { offset-position: inline-start block-start; }",
+		warnings: 1,
+		args: "always",
+	},
+	{
+		source: "body { offset-anchor: right 10px bottom; }",
+		expect: "body { offset-anchor: inline-end 10px block-end; }",
+		warnings: 1,
+		args: "always",
+	},
+	{
+		source: "body { offset-anchor: center; }",
+		warnings: 0,
+		args: "always",
+	},
+	{
+		source: "body { offset-position: left top; }",
+		expect: "body { offset-position: inline-end block-start; }",
+		args: ["always",{"direction":"rtl"}],
+	},
+	{
+		source: "body { margin-right: 0; }",
+		expect: "body { margin-block-start: 0; }",
+		args: "always",
+		languageOptions: {"directionality":{"block":"right-to-left","inline":"top-to-bottom"}},
+	},
+	{
+		source: "body { margin-left: 0; }",
+		expect: "body { margin-inline-start: 0; }",
+		args: ["always",{"writingMode":"horizontal-tb"}],
+		languageOptions: {"directionality":{"block":"right-to-left","inline":"top-to-bottom"}},
+	},
 ];

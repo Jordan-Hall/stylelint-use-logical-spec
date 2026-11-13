@@ -1,15 +1,13 @@
 import stylelint from 'stylelint';
 import valueParser from 'postcss-value-parser';
 import {
+	directions,
+	getMaps,
 	migrationNoneSpec,
-	physical2Prop,
-	physical4Prop,
-	physicalAxesShorthandProp,
-	physicalProp,
-	physicalShorthandProp,
-	physicalUnit,
-	physicalValue,
-	propsThatContainPropsInValue
+	positionProps,
+	propsThatContainPropsInValue,
+	toDirectionality,
+	writingModes
 } from './lib/maps.js';
 import { validateRuleWithProps } from './lib/validate.js';
 import { cssValueSplit } from './lib/value-split.js';
@@ -24,9 +22,26 @@ const reported = { prop: new WeakSet(), value: new WeakSet(), unit: new WeakSet(
 const expressionRegex = /^\$\{.*\}$/;
 const isExpression = node => expressionRegex.test(node.value ?? '');
 
+/**
+ * Picks the block and inline flow: the `writingMode` and `direction` options first,
+ * then stylelint's `languageOptions.directionality`, then horizontal-tb, ltr.
+ */
+const resolveDirectionality = (opts, result) => {
+	const { writingMode, direction } = Object(opts);
+	const configured = result.stylelint.config?.languageOptions?.directionality;
+
+	if (!writingMode && !direction && configured?.block && configured?.inline) {
+		return configured;
+	}
+
+	return toDirectionality(writingMode, direction);
+};
+
+const isString = value => typeof value === 'string';
+const isRegExp = value => value instanceof RegExp;
+
 function ruleFunc(method, opts) {
 	const propExceptions = [].concat(Object(opts).except || []);
-	const dir = /^rtl$/i.test(Object(opts).direction) ? 'rtl' : 'ltr';
 
 	return (root, result) => {
 		const isMethodValid = stylelint.utils.validateOptions(result, ruleName, {
@@ -34,11 +49,30 @@ function ruleFunc(method, opts) {
 			possible() {
 				return isMethodIndifferent(method) || isMethodAlways(method);
 			}
+		}, {
+			actual: opts,
+			possible: {
+				except: [isString, isRegExp],
+				direction: directions,
+				writingMode: writingModes
+			},
+			optional: true
 		});
 
 		if (!isMethodValid || !isMethodAlways(method)) {
 			return;
 		}
+
+		const {
+			physical2Prop,
+			physical4Prop,
+			physicalAxesShorthandProp,
+			physicalProp,
+			physicalShorthandProp,
+			physicalUnit,
+			physicalValue,
+			positionKeyword
+		} = getMaps(resolveDirectionality(opts, result));
 
 		/**
 		 * Reports once per group of declarations. Stylelint runs `fix` itself
@@ -93,15 +127,15 @@ function ruleFunc(method, opts) {
 			physical4Prop.forEach(([props, prop]) => {
 				validateRuleWithProps(node, props, (blockStartDecl, _a, inlineStartDecl, _b, blockEndDecl, _c, inlineEndDecl) => {
 					const decls = [blockStartDecl, inlineStartDecl, blockEndDecl, inlineEndDecl];
-					const values = shorthandValueShorten(decls.map(decl => decl.value));
+					const values = new Set(decls.map(decl => decl.value));
 
-					if (values.length === 1 && !decls.some(decl => isDeclAnException(decl, propExceptions))) {
+					if (values.size === 1 && !decls.some(decl => isDeclAnException(decl, propExceptions))) {
 						report({
 							message: messages.unexpectedProp(blockStartDecl.prop, prop),
 							decls,
 							owner: node,
 							fix() {
-								blockStartDecl.cloneBefore({ prop, value: values[0] });
+								blockStartDecl.cloneBefore({ prop, value: blockStartDecl.value });
 								decls.forEach(decl => decl.remove());
 							}
 						});
@@ -110,29 +144,29 @@ function ruleFunc(method, opts) {
 			});
 
 			// multi-value physical shorthands become *-block and *-inline
-			physicalShorthandProp.forEach(({ prop, block, inline }) => {
+			physicalShorthandProp.forEach(({ prop, block, inline, split }) => {
 				validateRuleWithProps(node, [prop], physicalDecl => {
 					const inputValues = cssValueSplit(physicalDecl.value);
 
-					if (!isDeclAnException(physicalDecl, propExceptions) && inputValues.length > 1) {
-						reportSplit(physicalDecl, { block, inline }, convertShorthandValues(inputValues, dir));
+					if (!isDeclAnException(physicalDecl, propExceptions) && inputValues.length > 1 && inputValues.length <= 4) {
+						reportSplit(physicalDecl, { block, inline }, split(inputValues));
 					}
 				});
 			});
 
 			// two-value `x y` shorthands (overflow, overscroll-behavior) become *-inline and *-block
-			physicalAxesShorthandProp.forEach(({ prop, block, inline }) => {
+			physicalAxesShorthandProp.forEach(({ prop, block, inline, split }) => {
 				validateRuleWithProps(node, [prop], physicalDecl => {
 					const [x, y, ...rest] = cssValueSplit(physicalDecl.value);
 
 					if (!isDeclAnException(physicalDecl, propExceptions) && y !== undefined && rest.length === 0 && x !== y) {
-						reportSplit(physicalDecl, { block, inline }, { block: y, inline: x });
+						reportSplit(physicalDecl, { block, inline }, split([x, y]));
 					}
 				});
 			});
 
 			// 2 physical properties become a logical shorthand
-			physical2Prop(dir).forEach(([props, prop]) => {
+			physical2Prop.forEach(([props, prop]) => {
 				validateRuleWithProps(node, props, (startDecl, startIndex, endDecl, endIndex) => {
 					if (!isDeclAnException(startDecl, propExceptions) && !isDeclAnException(endDecl, propExceptions)) {
 						const firstDecl = startIndex < endIndex ? startDecl : endDecl;
@@ -157,7 +191,7 @@ function ruleFunc(method, opts) {
 			});
 
 			// physical properties become logical properties
-			physicalProp(dir).forEach(([props, prop]) => {
+			physicalProp.forEach(([props, prop]) => {
 				validateRuleWithProps(node, props, physicalDecl => {
 					if (!isDeclAnException(physicalDecl, propExceptions)) {
 						report({
@@ -173,7 +207,7 @@ function ruleFunc(method, opts) {
 			});
 
 			// physical values become logical values
-			physicalValue(dir).forEach(([regexp, props]) => {
+			physicalValue.forEach(([regexp, props]) => {
 				if (isNodeMatchingDecl(node, regexp) && !isDeclAnException(node, propExceptions)) {
 					const valuekey = node.value.toLowerCase();
 
@@ -198,7 +232,7 @@ function ruleFunc(method, opts) {
 				const originalValue = node.value.toLowerCase();
 				let value = originalValue;
 
-				physicalProp(dir).forEach(([props, prop]) => {
+				physicalProp.forEach(([props, prop]) => {
 					props.forEach(searchProp => {
 						if (!isValueAnException(searchProp, propExceptions)) {
 							value = value.replace(new RegExp(`(?<!-)${searchProp}(?!-)`, 'g'), prop);
@@ -207,6 +241,35 @@ function ruleFunc(method, opts) {
 				});
 
 				if (value !== originalValue) {
+					report({
+						kind: 'value',
+						message: messages.unexpectedValue(node.prop, node.value, value),
+						decls: [node],
+						owner: node,
+						fix() {
+							node.value = value;
+						}
+					});
+				}
+			}
+
+			// physical <position> keywords in offset-anchor and offset-position become flow-relative
+			if (isNodeMatchingDecl(node, positionProps) && !isDeclAnException(node, propExceptions)) {
+				const parsed = valueParser(node.value);
+				let changed = false;
+
+				parsed.nodes.forEach(valueNode => {
+					const logical = valueNode.type === 'word' && positionKeyword[valueNode.value.toLowerCase()];
+
+					if (logical && !isValueAnException(valueNode.value, propExceptions)) {
+						valueNode.value = logical;
+						changed = true;
+					}
+				});
+
+				if (changed) {
+					const value = parsed.toString();
+
 					report({
 						kind: 'value',
 						message: messages.unexpectedValue(node.prop, node.value, value),
@@ -273,46 +336,3 @@ const isValueAnException = (value, propExceptions) => propExceptions.some(match 
 	? match.test(value)
 : String(match || '').toLowerCase() === String(value || '').toLowerCase());
 
-const shorthandValueShorten = values => {
-	const map = [[1, 0], [0, 2], [1, 3]];
-	for (let x = values.length - 2; x >= 0; x--)
-	{
-		if (values[map[x][0]] !== values[map[x][1]]) {
-			break;
-		}
-		values.pop();
-	}
-	return values;
-};
-
-const convertShorthandValues = (input, dir) => {
-	let block, inline;
-	if (input.length === 1) {
-		block = input[0];
-		inline = input[0];
-	}
-	if (input.length === 2) {
-		block = input[0];
-		inline = input[1];
-	}
-	if (input.length === 3) {
-		block = input[0] + ' ' + input[2];
-		inline = input[1];
-	}
-	if (input.length === 4) {
-		block = input[0] + ' ' + input[2];
-		inline = dir === 'ltr' ? input[3] + ' ' + input[1] : input[1] + ' ' + input[3];
-	}
-	return {
-		block: optimizeCssValues(block),
-		inline: optimizeCssValues(inline)
-	};
-};
-
-const optimizeCssValues = (value) => {
-	const values = cssValueSplit(value);
-	if (values.length === 2 && values[0] === values[1]) {
-		return values[0];
-	}
-	return value;
-}

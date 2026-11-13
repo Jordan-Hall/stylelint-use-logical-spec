@@ -4,8 +4,15 @@
   ### Breaking
   - Requires stylelint `^16.7.0 || ^17 || ^18` and Node.js `>=22`
   - Published as a native ES module; the `index.cjs.js` and `index.es.mjs` builds are removed
+  - `direction` must be exactly `"ltr"` or `"rtl"` (other values are now invalid options)
 
   ### New
+  - Vertical writing modes: `writingMode` option (`horizontal-tb`, `vertical-rl`,
+    `vertical-lr`, `sideways-rl`, `sideways-lr`) combined with `direction`; every
+    side, size, corner, axis, keyword and unit mapping follows it
+  - Falls back to stylelint's `languageOptions.directionality` when no option is set
+  - `offset-anchor` and `offset-position` keywords map to flow-relative sides
+  - Invalid `writingMode` and `direction` values are reported as invalid options
   - Full CSS Logical Level 1 coverage: `scroll-margin-*`, `scroll-padding-*`,
     `overflow-x/y`, `overscroll-behavior-x/y`, `contain-intrinsic-width/height`
   - Multi-value `border-width`, `border-style`, `border-color`, `scroll-margin`,
