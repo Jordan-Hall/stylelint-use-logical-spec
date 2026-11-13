@@ -2,6 +2,13 @@
 
 Releases from 6.0.0 on are written by [release-please](https://github.com/googleapis/release-please) from conventional commits. See [UPGRADING.md](UPGRADING.md) for the 6.0.0 migration notes.
 
+## [6.0.1](https://github.com/Jordan-Hall/stylelint-use-logical-spec/compare/stylelint-use-logical-spec-v6.0.0...stylelint-use-logical-spec-v6.0.1) (2026-11-13)
+
+
+### Bug Fixes
+
+* honour stylelint disable comments when merging sides ([1166eed](https://github.com/Jordan-Hall/stylelint-use-logical-spec/commit/1166eedc2e51ecbd18fbadd3de9d199ec3735bc6))
+
 ## [6.0.0](https://github.com/Jordan-Hall/stylelint-use-logical-spec/compare/stylelint-use-logical-spec-v5.0.1...stylelint-use-logical-spec-v6.0.0) (2026-11-13)
 
 
