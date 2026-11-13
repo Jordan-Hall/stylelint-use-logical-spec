@@ -17,11 +17,15 @@
 		},
 		"./package.json": "./package.json"
 	},
+	"bin": {
+		"stylelint-use-logical-spec": "./bin/migrate.js"
+	},
 	"main": "./index.js",
 	"files": [
 		"index.js",
 		"index.d.ts",
-		"lib"
+		"lib",
+		"bin"
 	],
 	"scripts": {
 		"lint": "eslint .",

@@ -76,6 +76,9 @@ stylelint 16.7+, 17 and 18 on Node.js 22 or later, and ships as an ES module.
 npm install stylelint stylelint-use-logical-spec --save-dev
 ```
 
+Upgrading from 5.x? Run `npx stylelint-use-logical-spec migrate` to update your
+config and stylesheets. See [UPGRADING.md](UPGRADING.md).
+
 Add [Property Use Logical] to your [stylelint configuration].
 
 ```js
