@@ -2,6 +2,27 @@
 
 Releases from 6.0.0 on are written by [release-please](https://github.com/googleapis/release-please) from conventional commits. See [UPGRADING.md](UPGRADING.md) for the 6.0.0 migration notes.
 
+## [6.0.0](https://github.com/Jordan-Hall/stylelint-use-logical-spec/compare/stylelint-use-logical-spec-v5.0.1...stylelint-use-logical-spec-v6.0.0) (2026-11-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* requires stylelint ^16.7.0 || ^17 || ^18 and Node.js >= 22.
+
+### Features
+
+* add a migrate command for upgrading from 5.x ([9574a20](https://github.com/Jordan-Hall/stylelint-use-logical-spec/commit/9574a20f1ebf8eba5ee6838aa1f6040a493b6e51))
+* map anchor positioning, scroll axes, container queries and prefixed logical properties ([ac347d0](https://github.com/Jordan-Hall/stylelint-use-logical-spec/commit/ac347d076ea0bf75de97469e2b27a437ac92f9a5))
+* rename inset-area to position-area and merge top-level declarations ([01c278f](https://github.com/Jordan-Hall/stylelint-use-logical-spec/commit/01c278fb220584f6f52041c2571d07760c9f2e22))
+* ship TypeScript types and check the published package ([9e1c298](https://github.com/Jordan-Hall/stylelint-use-logical-spec/commit/9e1c298ec6b09aac7254c568e32145a7949c284e))
+* support every writing mode and offset position keywords ([c1b807e](https://github.com/Jordan-Hall/stylelint-use-logical-spec/commit/c1b807e731925ee099c56d567bd916ea4428aaba))
+* support stylelint 16.7-18, full CSS Logical coverage and working CI ([f2a6f62](https://github.com/Jordan-Hall/stylelint-use-logical-spec/commit/f2a6f62e9a4b157047ce6f8574e10821b48e17bd))
+
+
+### Bug Fixes
+
+* keep cascade order when an override sits between merged sides ([9faa339](https://github.com/Jordan-Hall/stylelint-use-logical-spec/commit/9faa339243888360cb8e18a4c9ff532df4b911de))
+
 ## 5.0.1
   ### fixes
   - add support for stylelint 16
