@@ -3,8 +3,7 @@ import valueParser from 'postcss-value-parser';
 import {
 	directions,
 	getMaps,
-	migrationNoneSpec,
-	positionProps,
+	legacyProps,
 	propsThatContainPropsInValue,
 	toDirectionality,
 	writingModes
@@ -51,6 +50,9 @@ const hasInterveningOverride = (node, indexes, touches) => {
 		&& touches.has(child.prop.toLowerCase()));
 };
 
+/** `width`, `min-width`, `max-height`, ... as a size feature inside a container query. */
+const containerFeatureRegex = /(?<![\w-])(min-|max-)?(width|height)(?=\s*[:<>=)])/gi;
+
 const isString = value => typeof value === 'string';
 const isRegExp = value => value instanceof RegExp;
 
@@ -78,14 +80,16 @@ function ruleFunc(method, opts) {
 		}
 
 		const {
+			containerFeature,
+			functionKeyword,
+			keywordProps,
 			physical2Prop,
 			physical4Prop,
 			physicalAxesShorthandProp,
 			physicalProp,
 			physicalShorthandProp,
 			physicalUnit,
-			physicalValue,
-			positionKeyword
+			physicalValue
 		} = getMaps(resolveDirectionality(opts, result));
 
 		/**
@@ -121,21 +125,38 @@ function ruleFunc(method, opts) {
 		});
 
 		walk(root, node => {
-			migrationNoneSpec.forEach(([prop, props]) => {
-				validateRuleWithProps(node, prop, outDateDecl => {
+			// non-standard and vendor-prefixed logical properties become standard ones
+			const legacy = node.type === 'decl' && legacyProps[node.prop.toLowerCase()];
+
+			if (legacy && !isDeclAnException(node, propExceptions)) {
+				report({
+					message: messages.unsupportedProp(node.prop, legacy),
+					decls: [node],
+					owner: node,
+					fix() {
+						node.prop = legacy;
+					}
+				});
+			}
+
+			// @container size features become flow-relative
+			if (node.type === 'atrule' && node.name.toLowerCase() === 'container') {
+				const params = node.params.replace(containerFeatureRegex, (match, prefix = '', feature) => (
+					isValueAnException(match, propExceptions) ? match : prefix + containerFeature[feature.toLowerCase()]
+				));
+
+				if (params !== node.params) {
 					report({
-						message: messages.unsupportedProp(outDateDecl.prop, props),
-						decls: [outDateDecl],
+						kind: 'value',
+						message: messages.unexpectedQuery(node.params, params),
+						decls: [node],
 						owner: node,
 						fix() {
-							const { value } = outDateDecl;
-							outDateDecl.cloneBefore({ prop: props[0], value });
-							outDateDecl.cloneAfter({ prop: props[1], value });
-							outDateDecl.remove();
+							node.params = params;
 						}
 					});
-				});
-			});
+				}
+			}
 
 			// 4 physical properties become a logical shorthand only when every value is equal
 			physical4Prop.forEach(([props, prop, touches]) => {
@@ -144,6 +165,7 @@ function ruleFunc(method, opts) {
 					const values = new Set(decls.map(decl => decl.value));
 
 					if (values.size === 1
+						&& new Set(decls.map(decl => Boolean(decl.important))).size === 1
 						&& !decls.some(decl => isDeclAnException(decl, propExceptions))
 						&& !hasInterveningOverride(node, [a, b, c, d], touches)) {
 						report({
@@ -171,9 +193,9 @@ function ruleFunc(method, opts) {
 			});
 
 			// two-value `x y` shorthands (overflow, overscroll-behavior) become *-inline and *-block
-			physicalAxesShorthandProp.forEach(({ prop, block, inline, split }) => {
+			physicalAxesShorthandProp.forEach(({ prop, block, inline, group, split }) => {
 				validateRuleWithProps(node, [prop], physicalDecl => {
-					const [x, y, ...rest] = cssValueSplit(physicalDecl.value);
+					const [x, y, ...rest] = group(cssValueSplit(physicalDecl.value));
 
 					if (!isDeclAnException(physicalDecl, propExceptions) && y !== undefined && rest.length === 0 && x !== y) {
 						reportSplit(physicalDecl, { block, inline }, split([x, y]));
@@ -184,7 +206,8 @@ function ruleFunc(method, opts) {
 			// 2 physical properties become a logical shorthand
 			physical2Prop.forEach(([props, prop, touches]) => {
 				validateRuleWithProps(node, props, (startDecl, startIndex, endDecl, endIndex) => {
-					if (!isDeclAnException(startDecl, propExceptions)
+					if (Boolean(startDecl.important) === Boolean(endDecl.important)
+						&& !isDeclAnException(startDecl, propExceptions)
 						&& !isDeclAnException(endDecl, propExceptions)
 						&& !hasInterveningOverride(node, [startIndex, endIndex], touches)) {
 						const firstDecl = startIndex < endIndex ? startDecl : endDecl;
@@ -271,13 +294,17 @@ function ruleFunc(method, opts) {
 				}
 			}
 
-			// physical <position> keywords in offset-anchor and offset-position become flow-relative
-			if (isNodeMatchingDecl(node, positionProps) && !isDeclAnException(node, propExceptions)) {
+			// physical keywords (sides, position-area regions, x/y axes) become flow-relative
+			keywordProps.forEach(([regexp, keywords]) => {
+				if (!isNodeMatchingDecl(node, regexp) || isDeclAnException(node, propExceptions)) {
+					return;
+				}
+
 				const parsed = valueParser(node.value);
 				let changed = false;
 
 				parsed.nodes.forEach(valueNode => {
-					const logical = valueNode.type === 'word' && positionKeyword[valueNode.value.toLowerCase()];
+					const logical = valueNode.type === 'word' && keywords[valueNode.value.toLowerCase()];
 
 					if (logical && !isValueAnException(valueNode.value, propExceptions)) {
 						valueNode.value = logical;
@@ -298,9 +325,9 @@ function ruleFunc(method, opts) {
 						}
 					});
 				}
-			}
+			});
 
-			// physical viewport and container units (vw, vh, cqw, ...) become logical (vi, vb, cqi, ...)
+			// physical units (vw, vh, cqw, ...) and function keywords (anchor-size(width), scroll(x), ...) become logical
 			if (node.type === 'decl' && !isDeclAnException(node, propExceptions)) {
 				const parsed = valueParser(node.value);
 				let changed = false;
@@ -308,6 +335,19 @@ function ruleFunc(method, opts) {
 				parsed.walk(valueNode => {
 					if (valueNode.type === 'function' && valueNode.value.toLowerCase() === 'url') {
 						return false;
+					}
+
+					const keywords = valueNode.type === 'function' && functionKeyword[valueNode.value.toLowerCase()];
+
+					if (keywords) {
+						valueNode.nodes.forEach(arg => {
+							const logical = arg.type === 'word' && keywords[arg.value.toLowerCase()];
+
+							if (logical && !isValueAnException(arg.value, propExceptions)) {
+								arg.value = logical;
+								changed = true;
+							}
+						});
 					}
 
 					const dimension = valueNode.type === 'word' && valueParser.unit(valueNode.value);

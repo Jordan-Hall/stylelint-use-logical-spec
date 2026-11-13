@@ -307,8 +307,8 @@ split into `border-block-*` and `border-inline-*`.
 | `contain-intrinsic-width`  | `contain-intrinsic-inline-size` |
 | `contain-intrinsic-height` | `contain-intrinsic-block-size`  |
 
-`overflow: x y` and `overscroll-behavior: x y` split into the inline (x)
-and block (y) properties.
+`overflow: x y`, `overscroll-behavior: x y` and `contain-intrinsic-size: w h`
+split into the inline (x) and block (y) properties.
 
 ### Shorthands
 
@@ -325,9 +325,41 @@ Pairs of sides merge into an axis shorthand, for example `margin-top` and
 | `text-align`, `text-align-last` | `left` / `right`   | `start` / `end`           |
 | `resize`                     | `horizontal` / `vertical` | `inline` / `block`      |
 | `offset-anchor`, `offset-position` | `top` / `bottom` / `left` / `right` | `block-start` / `block-end` / `inline-start` / `inline-end` |
+| `position-area`, `position-try`, `position-try-fallbacks` | `top`, `span-left`, `x-start`, `y-self-end`, ... | `block-start`, `span-inline-start`, `inline-start`, `self-block-end`, ... |
+| `position-try-order`, `position-try` | `most-width` / `most-height` | `most-inline-size` / `most-block-size` |
+| `scroll-snap-type`, `scroll-timeline(-axis)`, `view-timeline(-axis)` | `x` / `y` | `inline` / `block` |
+| any value | `anchor-size(width)`, `scroll(x)`, `view(y)` | `anchor-size(inline)`, `scroll(inline)`, `view(block)` |
 
 Physical property names inside `transition`, `transition-property` and
 `will-change` values are mapped too.
+
+### Container queries
+
+`@container` size features map to flow-relative ones: `(min-width: 400px)`
+becomes `(min-inline-size: 400px)` and `(height > 1px)` becomes
+`(block-size > 1px)`. `@media` queries are left alone, because media queries
+have no flow-relative size features.
+
+### Legacy and prefixed properties
+
+Non-standard and vendor-prefixed logical properties are replaced by their
+standard names. `start`/`end` meant the inline axis and `before`/`after` the
+block axis:
+
+| Legacy Property | Logical Property |
+| --------------- | ---------------- |
+| `margin-start`, `-webkit-margin-start`, `-moz-margin-start` | `margin-inline-start` |
+| `padding-end`, `-webkit-padding-end`, `-moz-padding-end` | `padding-inline-end` |
+| `-webkit-margin-before`, `-webkit-padding-after` | `margin-block-start`, `padding-block-end` |
+| `-webkit-border-start(-width/-style/-color)`, `-moz-border-end(-*)` | `border-inline-start(-*)`, `border-inline-end(-*)` |
+| `-webkit-border-before(-*)`, `-webkit-border-after(-*)` | `border-block-start(-*)`, `border-block-end(-*)` |
+| `inset-start`, `inset-end` | `inset-inline-start`, `inset-inline-end` |
+| `-webkit-logical-width`, `-webkit-min-logical-height`, ... | `inline-size`, `min-block-size`, ... |
+
+### `!important`
+
+Sides are only merged into a shorthand when they share the same `!important`
+flag, so a fix never makes a declaration more or less important.
 
 ### Units
 
@@ -343,10 +375,13 @@ Add a unit to `except` (for example `{ "except": ["vw"] }`) to keep it.
 stylelint 17.12 and later include `property-layout-mappings`,
 `value-keyword-layout-mappings` and `unit-layout-mappings`. This plugin
 reads the same `languageOptions.directionality`, and also offers
-`writingMode`/`direction` options, merging of side pairs into axis
-shorthands, mapping inside `transition` and `will-change` values, migration
-of the non-standard `margin-start`-style properties, and support for
-stylelint 16.
+`writingMode`/`direction` options, autofix for every problem it reports,
+merging of side pairs into axis shorthands, mapping inside `transition` and
+`will-change` values, anchor positioning, scroll snap and scroll-driven
+animation axes, `@container` size features, migration of legacy and
+vendor-prefixed logical properties, and support for stylelint 16. Enable
+either this rule or the built-in rules, not both, to avoid duplicate
+warnings.
 
 ## Special thanks
 Codebase off https://github.com/csstools/stylelint-use-logical
