@@ -76,6 +76,17 @@ jobs:
         with:
           node-version: latest
           cache: npm
-      - run: npm ci
-      - run: npm install --no-save stylelint@${{ matrix.tag }}
-      - run: npm test
+      - id: tag
+        # stylelint only publishes a `next` tag during pre-release cycles
+        run: |
+          if version=$(npm view "stylelint@${{ matrix.tag }}" version 2>/dev/null) && [ -n "$version" ]; then
+            echo "version=$version" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::stylelint has no ${{ matrix.tag }} tag; skipping"
+          fi
+      - if: steps.tag.outputs.version
+        run: npm ci
+      - if: steps.tag.outputs.version
+        run: npm install --no-save stylelint@${{ steps.tag.outputs.version }}
+      - if: steps.tag.outputs.version
+        run: npm test
