@@ -69,7 +69,8 @@ blockquote {
 
 ## Usage
 
-Add [stylelint] and [Property Use Logical] to your project.
+Add [stylelint] and [Property Use Logical] to your project. Version 6 supports
+stylelint 16.7+, 17 and 18 on Node.js 22 or later, and ships as an ES module.
 
 ```bash
 npm install stylelint stylelint-use-logical-spec --save-dev
@@ -85,6 +86,16 @@ Add [Property Use Logical] to your [stylelint configuration].
   "rules": {
     "liberty/use-logical-spec": ("always" || true) || ("ignore" || false || null)
   }
+}
+```
+
+To turn the rule off for one line or block, use the standard stylelint
+disable comments:
+
+```css
+a {
+  /* stylelint-disable-next-line liberty/use-logical-spec */
+  margin-left: 0;
 }
 ```
 
@@ -244,15 +255,66 @@ Assuming _left to right_ directionality:
 | `border-right-style`         | `border-inline-end-style`   |
 | `border-right-width`         | `border-inline-end-width`   |
 | `border-top-left-radius`     | `border-start-start-radius` |
-| `border-bottom-left-radius`  | `border-start-end-radius`   |
-| `border-top-right-radius`    | `border-end-start-radius`   |
+| `border-top-right-radius`    | `border-start-end-radius`   |
+| `border-bottom-left-radius`  | `border-end-start-radius`   |
 | `border-bottom-right-radius` | `border-end-end-radius`     |
 
+`border-width`, `border-style` and `border-color` with more than one value
+split into `border-block-*` and `border-inline-*`.
 
-border-start-start-radius	border-top-left-radius
-border-start-end-radius	border-bottom-left-radius
-border-end-start-radius	border-top-right-radius
-border-end-end-radius	border-bottom-right-radius
+### Scroll margin and padding
+
+`scroll-margin-*` and `scroll-padding-*` map like `margin-*` and
+`padding-*`, for example `scroll-margin-left` → `scroll-margin-inline-start`.
+
+### Overflow, overscroll and intrinsic size
+
+| Physical Property          | Logical Property                |
+| -------------------------- | ------------------------------- |
+| `overflow-x`               | `overflow-inline`               |
+| `overflow-y`               | `overflow-block`                |
+| `overscroll-behavior-x`    | `overscroll-behavior-inline`    |
+| `overscroll-behavior-y`    | `overscroll-behavior-block`     |
+| `contain-intrinsic-width`  | `contain-intrinsic-inline-size` |
+| `contain-intrinsic-height` | `contain-intrinsic-block-size`  |
+
+`overflow: x y` and `overscroll-behavior: x y` split into the inline (x)
+and block (y) properties.
+
+### Shorthands
+
+Pairs of sides merge into an axis shorthand, for example `margin-top` and
+`margin-bottom` become `margin-block`. Multi-value `inset`, `margin`,
+`padding`, `scroll-margin` and `scroll-padding` split into `*-block` and
+`*-inline`. Four equal sides collapse to the plain shorthand.
+
+### Values
+
+| Property                     | Physical Value          | Logical Value             |
+| ---------------------------- | ----------------------- | ------------------------- |
+| `float`, `clear`             | `left` / `right`        | `inline-start` / `inline-end` |
+| `text-align`, `text-align-last` | `left` / `right`   | `start` / `end`           |
+| `resize`                     | `horizontal` / `vertical` | `inline` / `block`      |
+
+Physical property names inside `transition`, `transition-property` and
+`will-change` values are mapped too.
+
+### Units
+
+| Physical Unit                    | Logical Unit                     |
+| -------------------------------- | -------------------------------- |
+| `vw`, `svw`, `lvw`, `dvw`, `cqw` | `vi`, `svi`, `lvi`, `dvi`, `cqi` |
+| `vh`, `svh`, `lvh`, `dvh`, `cqh` | `vb`, `svb`, `lvb`, `dvb`, `cqb` |
+
+Add a unit to `except` (for example `{ "except": ["vw"] }`) to keep it.
+
+### Stylelint's built-in rules
+
+stylelint 17.12 and later include `property-layout-mappings`,
+`value-keyword-layout-mappings` and `unit-layout-mappings`. This plugin
+adds the `direction: "rtl"` option, mapping inside `transition` and
+`will-change` values, migration of the non-standard `margin-start`-style
+properties, and support for stylelint 16.
 
 ## Special thanks
 Codebase off https://github.com/csstools/stylelint-use-logical

@@ -26,7 +26,7 @@ scope and avoid unrelated commits.
    cd stylelint-use-logical-spec
 
    # Assign the original repo to a remote called "upstream"
-   git remote add upstream git@github.com:csstools/stylelint-use-logical-spec.git
+   git remote add upstream git@github.com:Jordan-Hall/stylelint-use-logical-spec.git
 
    # Install the tools necessary for testing
    npm install
@@ -44,8 +44,8 @@ scope and avoid unrelated commits.
 
 3. If your code follows our practices, then push your feature branch:
    ```bash
-   # Test current code
-   npm test
+   # Lint and test current code
+   npm run check
    ```
    ```bash
    # Push the branch for your new feature
@@ -55,6 +55,10 @@ scope and avoid unrelated commits.
    # Or, push the branch for your update
    git push origin update/something
    ```
+
+Test cases live in `test/cases.js`: `warnings` is the expected warning count,
+`expect` is the expected output after `--fix`. CI runs them against every
+supported stylelint major.
 
 That’s it! Now [open a pull request] with a clear title and description.
 

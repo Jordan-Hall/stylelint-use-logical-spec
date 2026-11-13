@@ -1,20 +1,20 @@
 export default [
 	{
-		languageOptions: {
-			sourceType: "module",
-			globals: {
-				console: "readonly",
-			},
-		},
-		rules: {
-			"eqeqeq": "error",
-			"no-shadow": "error",
-			"no-param-reassign": ["error", { "props": false }],
-			"no-undef": "error",
-			"no-unused-vars": "error",
-		},
+		ignores: ['node_modules/**'],
 	},
 	{
-		ignores: ["index.*.*", "*.log*", ".*"],
+		files: ['**/*.js', '**/*.mjs'],
+		languageOptions: {
+			ecmaVersion: 'latest',
+			sourceType: 'module',
+			globals: { console: 'readonly', fetch: 'readonly', URL: 'readonly' },
+		},
+		rules: {
+			'eqeqeq': 'error',
+			'no-shadow': 'error',
+			'no-param-reassign': ['error', { props: false }],
+			'no-undef': 'error',
+			'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+		},
 	},
 ];
