@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+  # Weekly run against stylelint@latest and @next catches upstream breakage early.
+  schedule:
+    - cron: "0 6 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+
+  matrix:
+    # Supported Node.js majors (from the Node.js release schedule) and stylelint
+    # versions (from peerDependencies), so neither list is maintained by hand.
+    runs-on: ubuntu-latest
+    outputs:
+      node: ${{ steps.matrix.outputs.node }}
+      stylelint: ${{ steps.matrix.outputs.stylelint }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+      - id: matrix
+        run: node scripts/ci-matrix.mjs | tee -a "$GITHUB_OUTPUT"
+
+  test:
+    name: test (node ${{ matrix.node }}, stylelint ${{ matrix.stylelint }})
+    needs: matrix
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ${{ fromJSON(needs.matrix.outputs.node) }}
+        stylelint: ${{ fromJSON(needs.matrix.outputs.stylelint) }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm install --no-save stylelint@${{ matrix.stylelint }}
+      - run: npm test
+
+  canary:
+    name: canary (stylelint ${{ matrix.tag }})
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        tag: [latest, next]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: latest
+          cache: npm
+      - run: npm ci
+      - run: npm install --no-save stylelint@${{ matrix.tag }}
+      - run: npm test

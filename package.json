@@ -1,6 +1,6 @@
 {
   "name": "stylelint-use-logical-spec",
-  "version": "5.0.1",
+  "version": "6.0.0",
   "description": "Enforce usage of logical properties and values in CSS",
   "license": "CC0-1.0",
   "repository": {
@@ -9,36 +9,32 @@
   },
   "homepage": "https://github.com/Jordan-Hall/stylelint-use-logical-spec#readme",
   "bugs": "https://github.com/Jordan-Hall/stylelint-use-logical-spec/issues",
-  "main": "index.cjs.js",
-  "module": "index.es.mjs",
+  "type": "module",
+  "exports": {
+    ".": "./index.js",
+    "./package.json": "./package.json"
+  },
+  "main": "./index.js",
   "files": [
-    "index.cjs.js",
-    "index.cjs.js.map",
-    "index.es.mjs",
-    "index.es.mjs.map"
+    "index.js",
+    "lib"
   ],
   "scripts": {
-    "prepublishOnly": "npm test",
-    "pretest": "rollup -c .rollup.js --silent",
-    "test": "npm run test:js && npm run test:tape",
-    "test:js": "eslint *.js lib/*.js --cache --quiet",
-    "test:tape": "stylelint-tape"
+    "lint": "eslint .",
+    "test": "node --test test/*.test.js",
+    "check": "npm run lint && npm test",
+    "prepublishOnly": "npm run check"
   },
   "engines": {
-    "node": ">=8.0.0"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.12.3",
-    "@babel/preset-env": "^7.12.1",
-    "@rollup/plugin-babel": "^5.2.1",
-    "eslint": "^4.19.1",
-    "pre-commit": "^1.2.2",
-    "rollup": "^2.33.1",
-    "stylelint": "^17.0.0",
-    "stylelint-tape": "^2.0.0"
+    "node": ">=22"
   },
   "peerDependencies": {
-    "stylelint": ">=11 < 18"
+    "stylelint": "^16.7.0 || ^17.0.0 || ^18.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^10.1.0",
+    "postcss-styled-syntax": "^0.7.4",
+    "stylelint": "^18.0.0"
   },
   "keywords": [
     "stylelint",
@@ -67,5 +63,8 @@
     "padding",
     "size",
     "text"
-  ]
+  ],
+  "dependencies": {
+    "postcss-value-parser": "^4.2.0"
+  }
 }

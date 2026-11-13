@@ -1,5 +1,28 @@
 # Changes to Property Use Logical
 
+## 6.0.0
+  ### Breaking
+  - Requires stylelint `^16.7.0 || ^17 || ^18` and Node.js `>=22`
+  - Published as a native ES module; the `index.cjs.js` and `index.es.mjs` builds are removed
+
+  ### New
+  - Full CSS Logical Level 1 coverage: `scroll-margin-*`, `scroll-padding-*`,
+    `overflow-x/y`, `overscroll-behavior-x/y`, `contain-intrinsic-width/height`
+  - Multi-value `border-width`, `border-style`, `border-color`, `scroll-margin`,
+    `scroll-padding`, `overflow` and `overscroll-behavior` split by axis
+  - `resize: horizontal/vertical` → `inline/block` and `text-align-last` (#11)
+  - Viewport and container units `vw/vh` (and `sv*`, `lv*`, `dv*`, `cq*`) → `vi/vb` (#38)
+
+  ### Fixes
+  - Autofix works again on stylelint 17 and 18 (uses the `report({ fix })` API)
+  - The CSS-in-JS expression check no longer alternates between results (stateful `/g` regex)
+  - No more `console.warn` output for the non-standard `margin-start`-style properties
+
+  ### Internal
+  - Tests run on `node:test`; CI derives the Node.js and stylelint matrix from the
+    Node.js release schedule and `peerDependencies`, plus a weekly canary on stylelint latest and next
+  - GitHub Actions CI, npm trusted publishing with provenance, and Dependabot
+
 ## 5.0.1
   ### fixes
   - add support for stylelint 16
