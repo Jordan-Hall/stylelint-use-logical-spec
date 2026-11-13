@@ -43,3 +43,13 @@ test('rejects unknown writingMode and direction values', async () => {
 	const { results: [result] } = await lint('a { margin-left: 0; }', ['always', { writingMode: 'diagonal', direction: 'up' }]);
 	assert.equal(result.invalidOptionWarnings.length, 2);
 });
+
+test('#41: a disable comment on a side of a pair is not reported as needless', async () => {
+	const { results: [result] } = await stylelint.lint({
+		code: 'a {\n  /* stylelint-disable-next-line liberty/use-logical-spec */\n  margin-top: 1px;\n  margin-bottom: 1px;\n}',
+		reportNeedlessDisables: true,
+		config: { plugins: [plugin], rules: { [ruleName]: 'always' } },
+	});
+	assert.deepEqual(result.warnings.filter(w => w.rule === '--report-needless-disables'), []);
+	assert.equal(result.warnings.length, 1);
+});

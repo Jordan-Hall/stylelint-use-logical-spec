@@ -422,6 +422,62 @@ export default [
 		warnings: 0,
 		args: "always",
 	},
+	{
+		// #41: a disabled side is never merged into its pair, and its partner is still fixed
+		source: "a {\n  /* stylelint-disable-next-line liberty/use-logical-spec */\n  margin-top: 1px;\n  margin-bottom: 1px;\n}",
+		expect: "a {\n  /* stylelint-disable-next-line liberty/use-logical-spec */\n  margin-top: 1px;\n  margin-block-end: 1px;\n}",
+		warnings: 1,
+		args: "always",
+	},
+	{
+		// #41: the merge would otherwise delete a disabled later side
+		source: "a {\n  margin-top: 1px;\n  /* stylelint-disable-next-line liberty/use-logical-spec */\n  margin-bottom: 1px;\n}",
+		expect: "a {\n  margin-block-start: 1px;\n  /* stylelint-disable-next-line liberty/use-logical-spec */\n  margin-bottom: 1px;\n}",
+		warnings: 1,
+		args: "always",
+	},
+	{
+		// #41: one disabled side stops the 4-side shorthand; the other sides still merge by axis
+		source: "a {\n  top: 0;\n  right: 0;\n  /* stylelint-disable-next-line liberty/use-logical-spec */\n  bottom: 0;\n  left: 0;\n}",
+		expect: "a {\n  inset-block-start: 0;\n  inset-inline: 0;\n  /* stylelint-disable-next-line liberty/use-logical-spec */\n  bottom: 0;\n}",
+		warnings: 2,
+		args: "always",
+	},
+	{
+		// #41: a disabled side does not hide the warning on its partner
+		source: "a {\n  /* stylelint-disable-next-line liberty/use-logical-spec */\n  right: 2px;\n  left: 1px;\n  width: 4px;\n}",
+		expect: "a {\n  /* stylelint-disable-next-line liberty/use-logical-spec */\n  right: 2px;\n  inset-inline-start: 1px;\n  inline-size: 4px;\n}",
+		warnings: 2,
+		args: "always",
+	},
+	{
+		// #41: stylelint-disable-line works inside a pair
+		source: "a { padding-left: 0; /* stylelint-disable-line liberty/use-logical-spec */\n  padding-right: 0; }",
+		expect: "a { padding-left: 0; /* stylelint-disable-line liberty/use-logical-spec */\n  padding-inline-end: 0; }",
+		warnings: 1,
+		args: "always",
+	},
+	{
+		// #41: a disable comment without a rule name covers this rule
+		source: "a {\n  /* stylelint-disable-next-line */\n  margin-top: 1px;\n  margin-bottom: 1px;\n}",
+		expect: "a {\n  /* stylelint-disable-next-line */\n  margin-top: 1px;\n  margin-block-end: 1px;\n}",
+		warnings: 1,
+		args: "always",
+	},
+	{
+		// #41: a disable/enable block keeps a pair across its edge apart
+		source: "a {\n  margin-left: 0;\n  /* stylelint-disable liberty/use-logical-spec */\n  margin-right: 0;\n  /* stylelint-enable liberty/use-logical-spec */\n}",
+		expect: "a {\n  margin-inline-start: 0;\n  /* stylelint-disable liberty/use-logical-spec */\n  margin-right: 0;\n  /* stylelint-enable liberty/use-logical-spec */\n}",
+		warnings: 1,
+		args: "always",
+	},
+	{
+		// #41: the snippet from #41: logical properties are left alone
+		source: "a {\n  /* stylelint-disable-next-line liberty/use-logical-spec */\n  inset-inline-end: 2px;\n\n  /* stylelint-disable-next-line liberty/use-logical-spec */\n  inline-size: 4px;\n}",
+		expect: "a {\n  /* stylelint-disable-next-line liberty/use-logical-spec */\n  inset-inline-end: 2px;\n\n  /* stylelint-disable-next-line liberty/use-logical-spec */\n  inline-size: 4px;\n}",
+		warnings: 0,
+		args: "always",
+	},
 	// CSS Logical Level 1 coverage aligned with stylelint's *-layout-mappings rules
 	{
 		source: "body { scroll-margin-left: 0; }",

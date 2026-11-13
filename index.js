@@ -166,7 +166,7 @@ function ruleFunc(method, opts) {
 
 					if (values.size === 1
 						&& new Set(decls.map(decl => Boolean(decl.important))).size === 1
-						&& !decls.some(decl => isDeclAnException(decl, propExceptions))
+						&& !decls.some(decl => isDeclAnException(decl, propExceptions) || isDisabled(decl, result))
 						&& !hasInterveningOverride(node, [a, b, c, d], touches)) {
 						report({
 							message: messages.unexpectedProp(blockStartDecl.prop, prop),
@@ -209,6 +209,8 @@ function ruleFunc(method, opts) {
 					if (Boolean(startDecl.important) === Boolean(endDecl.important)
 						&& !isDeclAnException(startDecl, propExceptions)
 						&& !isDeclAnException(endDecl, propExceptions)
+						&& !isDisabled(startDecl, result)
+						&& !isDisabled(endDecl, result)
 						&& !hasInterveningOverride(node, [startIndex, endIndex], touches)) {
 						const firstDecl = startIndex < endIndex ? startDecl : endDecl;
 
@@ -396,6 +398,24 @@ const isMethodIndifferent = method => method === 'ignore' || method === false ||
 const isMethodAlways = method => method === 'always' || method === true;
 const isNodeMatchingDecl = (decl, regexp) => decl.type === 'decl' && regexp.test(decl.prop);
 const isDeclAnException = (decl, propExceptions) => isValueAnException(decl.prop, propExceptions);
+
+/**
+ * Whether a stylelint disable comment turns this rule off for the declaration, checked
+ * the way stylelint's `report` does. A disabled declaration must never be merged with
+ * another: the merged report would land on one line and fix or hide the other.
+ */
+const isDisabled = (decl, result) => {
+	const line = decl.source?.start?.line;
+	const { disabledRanges = {}, config = {} } = result.stylelint ?? {};
+
+	if (line === undefined || config.ignoreDisables) {
+		return false;
+	}
+
+	return (disabledRanges[ruleName] ?? disabledRanges.all ?? []).some(range => range.start <= line
+		&& (range.end === undefined || range.end >= line)
+		&& (!range.rules || range.rules.includes(ruleName)));
+};
 const isValueAnException = (value, propExceptions) => propExceptions.some(match => match instanceof RegExp
 	? match.test(value)
 : String(match || '').toLowerCase() === String(value || '').toLowerCase());
