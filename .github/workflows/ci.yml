@@ -27,6 +27,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run package
 
   matrix:
     # Supported Node.js majors (from the Node.js release schedule) and stylelint
@@ -61,6 +63,15 @@ jobs:
       - run: npm ci
       - run: npm install --no-save stylelint@${{ matrix.stylelint }}
       - run: npm test
+
+  # The one required status check: passes only when lint and every test job pass.
+  ci-ok:
+    if: always()
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    steps:
+      - run: exit 1
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped')
 
   canary:
     name: canary (stylelint ${{ matrix.tag }})

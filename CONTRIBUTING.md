@@ -60,8 +60,14 @@ Test cases live in `test/cases.js`: `warnings` is the expected warning count,
 `expect` is the expected output after `--fix`. CI runs them against every
 supported stylelint major.
 
+Commit messages follow [Conventional Commits] (`feat:`, `fix:`, `feat!:` for
+breaking changes). They decide the next version and the changelog: release-please
+keeps a release PR open, and merging it tags the release and publishes to npm.
+Pull requests are rebase-merged so every commit reaches the changelog.
+
 That’s it! Now [open a pull request] with a clear title and description.
 
+[Conventional Commits]:  https://www.conventionalcommits.org/
 [already been reported]: issues
 [fork this project]:     fork
 [live example]:          https://codepen.io/pen

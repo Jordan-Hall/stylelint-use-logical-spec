@@ -1,18 +1,48 @@
 name: Release
 
+# release-please keeps a release PR open with the next version and changelog,
+# generated from conventional commits. Merging it tags a GitHub release and
+# publishes to npm in the same run (releases made with GITHUB_TOKEN do not
+# trigger other workflows).
 on:
-  release:
-    types: [published]
+  push:
+    branches: [master]
+  workflow_dispatch:
 
 permissions:
   contents: read
-  id-token: write # npm trusted publishing + provenance
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
 
 jobs:
-  publish:
+  release-please:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - id: release
+        uses: googleapis/release-please-action@v5
+        with:
+          # Optional PAT so CI runs on the release PR; GITHUB_TOKEN PRs do not trigger workflows.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
+
+  publish:
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm trusted publishing + provenance
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
       - uses: actions/setup-node@v7
         with:
           node-version: 24
@@ -20,9 +50,4 @@ jobs:
       - run: npm install -g npm@latest
       - run: npm ci
       - run: npm run check
-      - name: Verify tag matches package.json
-        run: test "v$(node -p "require('./package.json').version")" = "${GITHUB_REF_NAME}"
       - run: npm publish --provenance --access public
-        env:
-          # Used only if trusted publishing is not configured on npmjs.com.
-          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
