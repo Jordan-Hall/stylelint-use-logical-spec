@@ -1,6 +1,23 @@
 # Upgrading to 6.0.0
 
-Run `npx stylelint --fix` after upgrading: most new warnings fix themselves.
+After upgrading, run the migration from your project root:
+
+```bash
+npx stylelint-use-logical-spec migrate --dry-run   # report only
+npx stylelint-use-logical-spec migrate             # apply
+npx stylelint-use-logical-spec migrate "src/**/*.{js,tsx}"   # CSS-in-JS, with a customSyntax in your config
+```
+
+It:
+- warns when Node.js or stylelint is older than 6.x supports
+- rewrites the removed `stylelint-use-logical-spec/index.cjs.js` and `index.es.mjs`
+  entry points in your stylelint config to `stylelint-use-logical-spec`
+- rewrites `direction` values 6.x rejects to the value 5.x used for them
+  (`"RTL"` → `"rtl"`, anything else → `"ltr"`)
+- applies only this rule's fixes to your stylesheets, using each file's own config
+  (syntax, options, ignores), and lists what is left to change by hand
+
+It exits with code 1 when warnings are left for you to fix by hand.
 
 ## Breaking
 - Requires stylelint `^16.7.0 || ^17 || ^18` and Node.js `>=22`
