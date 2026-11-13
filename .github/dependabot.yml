@@ -5,6 +5,11 @@ updates:
     schedule:
       interval: weekly
     versioning-strategy: increase
+    # Conventional prefixes feed the release-please changelog.
+    commit-message:
+      prefix: fix
+      prefix-development: chore
+      include: scope
     groups:
       dev-dependencies:
         dependency-type: development
@@ -14,6 +19,8 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    commit-message:
+      prefix: ci
     groups:
       actions:
         patterns: ["*"]

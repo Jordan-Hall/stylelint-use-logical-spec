@@ -89,6 +89,23 @@ Add [Property Use Logical] to your [stylelint configuration].
 }
 ```
 
+Declarations at the top level (CSS-in-JS templates, style attributes) are
+checked and merged the same way as declarations inside a rule.
+
+TypeScript types ship with the package, so the rule settings can be checked:
+
+```ts
+import type { Config } from 'stylelint';
+import useLogical, { type RuleSettings } from 'stylelint-use-logical-spec';
+
+const logical: RuleSettings = ['always', { writingMode: 'vertical-rl', direction: 'rtl' }];
+
+export default {
+  plugins: [useLogical],
+  rules: { [useLogical.ruleName]: logical }
+} satisfies Config;
+```
+
 To turn the rule off for one line or block, use the standard stylelint
 disable comments:
 
@@ -355,6 +372,7 @@ block axis:
 | `-webkit-border-before(-*)`, `-webkit-border-after(-*)` | `border-block-start(-*)`, `border-block-end(-*)` |
 | `inset-start`, `inset-end` | `inset-inline-start`, `inset-inline-end` |
 | `-webkit-logical-width`, `-webkit-min-logical-height`, ... | `inline-size`, `min-block-size`, ... |
+| `inset-area` (renamed in the spec) | `position-area` |
 
 ### `!important`
 
